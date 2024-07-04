@@ -8,8 +8,10 @@ import { getPlayer } from '@dcl/sdk/src/players'
 import { Disc, Player } from './components'
 
 let movesHistory: any = []
+const maxDiscs = 6
 
 const movesSign = engine.addEntity()
+const currentPlayerEntity = engine.addEntity()
 
 export function main() {
 
@@ -49,7 +51,7 @@ export function main() {
   }
 
   //add click trigger for towers
-  const towers = ['click_tower_1', 'click_tower_2', 'click_tower_3']
+  const towers = ['init', 'click_tower_1', 'click_tower_2', 'click_tower_3']
 
   for (const tower of towers) {
 
@@ -69,6 +71,7 @@ export function main() {
   }
 
   // startLevel(3)
+  initDiscs()
 
   //create moves board
   Transform.create(movesSign, {
@@ -81,22 +84,23 @@ export function main() {
   updateTextShape()
 
   //TODO: complete currentPlayer mechanics
-  const currentPlayer = Player.getOrNull(engine.RootEntity)
 
-  if (!currentPlayer){
-    Player.create(engine.RootEntity)
-  
-    syncEntity(engine.RootEntity, [Player.componentId])
-  }
+  // const currentPlayer = Player.getOrNull(currentPlayerEntity)
+
+  // if (!currentPlayer) {
+    Player.create(currentPlayerEntity)
+
+    syncEntity(currentPlayerEntity, [Player.componentId], 33)
+  // }
 }
 
 
-function updateTextShape () {
+function updateTextShape() {
 
   TextShape.createOrReplace(movesSign, {
     text: `${movesHistory.length} moves`,
   })
-  
+
 }
 
 function undo() {
@@ -201,13 +205,11 @@ function getLandingHeight(towerDiscsCount: number) {
   return height
 }
 
-const towerLocations = [13, 8, 3]
+const towerLocations = [-1, 13, 8, 3]
 
 function clearSelection() {
   const selectedEntity = [...engine.getEntitiesWith(Disc)].find(([entity, disc]) => disc.isSelected)
-
   if (selectedEntity) Disc.getMutable(selectedEntity[0]).isSelected = false
-
 }
 
 function selectDisc(tower: number) {
@@ -251,36 +253,28 @@ function elevateDisc(discEntity: Entity) {
 
 
 
-function validateCurrentPlayer () {
+function validateCurrentPlayer() {
+  console.log("validating current player")
   const playerData = getPlayer()
 
-  const currentPlayerEntity = Player.get(engine.RootEntity)
-  console.log(currentPlayerEntity)
-  
-  if (playerData && (!currentPlayerEntity.address || currentPlayerEntity.address === playerData.userId)){
-    Player.getMutable(engine.RootEntity).address = playerData.userId
+  const currentPlayer = Player.get(currentPlayerEntity)
+  console.log(currentPlayer)
+
+  if (playerData && (!currentPlayer.address || currentPlayer.address === playerData.userId)) {
+    Player.getMutable(currentPlayerEntity).address = playerData.userId
     return true
   }
-  
+
   return false
 }
 
-function startLevel(levelN: number) {
-
-  if (!validateCurrentPlayer()) return
-
-  const discs = engine.getEntitiesWith(Disc)
-
-  clearSelection()
-
-  for (const [entity] of discs) {
-    engine.removeEntityWithChildren(entity)
-  }
-
-  for (var i = 0; i <= levelN; i++) {
+function initDiscs() {
+  
+  for (var i = 0; i <= maxDiscs - 1; i++) {
+    
     const entity = engine.addEntity()
-
-    Transform.create(entity, { position: { x: 11.25, y: getLandingHeight(levelN - i), z: 13 }, scale: { x: 1 + i, y: 0.3, z: 1 + i } })
+    
+    Transform.create(entity, { position: { x: 11.25, y: -5, z: 13 }, scale: { x: 1 + i, y: 0.3, z: 1 + i } })
     MeshRenderer.setCylinder(entity)
     MeshCollider.setCylinder(entity)
     Material.setPbrMaterial(entity, { albedoColor: Color4.fromHexString(getRandomHexColor()) })
@@ -288,12 +282,49 @@ function startLevel(levelN: number) {
       size: i + 1,
       currentTower: 0
     })
-
+    
 
     syncEntity(
       entity,
       [Transform.componentId, MeshRenderer.componentId, Material.componentId, Disc.componentId],
-      entity
+      100+i
     )
+  }
+
+}
+
+function startLevel(levelN: number) {
+
+  if (!validateCurrentPlayer()) return
+
+  clearSelection()
+  
+  const discs = [...engine.getEntitiesWith(Disc)]
+  // for (const [entity] of discs) {
+  //   engine.removeEntityWithChildren(entity)
+  // }
+
+  for (var i = 0; i <= maxDiscs - 1; i++) {
+
+    const entity = (discs.find(([entity, disc]) => disc.size === i + 1) || [])[0]
+    
+    if (!entity) continue
+
+    const currentTransform = Transform.getMutable(entity)
+    // currentTransform.scale = { x: 1 + i, y: 0.3, z: 1 + i }
+    if (i <= levelN) {
+      currentTransform.position = { x: 11.25, y: getLandingHeight(levelN - i), z: 13 }
+      Disc.getMutable(entity).currentTower = 1
+    } else {
+      currentTransform.position = { x: 11.25, y: -5, z: 13 }
+      Disc.getMutable(entity).currentTower = 0
+    }
+    
+
+    // syncEntity(
+    //   entity,
+    //   [Transform.componentId, MeshRenderer.componentId, Material.componentId, Disc.componentId],
+    //   entity
+    // )
   }
 }
