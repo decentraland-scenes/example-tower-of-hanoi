@@ -11,6 +11,7 @@ let movesHistory: any = []
 const maxDiscs = 7
 
 const movesSign = engine.addEntity()
+const playerSign = engine.addEntity()
 const currentPlayerEntity = engine.addEntity()
 
 export function initGame() {
@@ -79,24 +80,28 @@ export function initGame() {
     rotation: Quaternion.fromEulerDegrees(0, 90, 0)
   })
 
-  syncEntity(movesSign, [TextShape.componentId], movesSign)
+  TextShape.create(movesSign, {
+    text: ''
+  })
 
-  updateTextShape()
+  syncEntity(movesSign, [TextShape.componentId], 3000)
 
-  //TODO: complete currentPlayer mechanics
+  //create current player board
+  Transform.create(playerSign, {
+    // position: Vector3.create(15.5, 2, 8),
+    rotation: Quaternion.fromEulerDegrees(0, 90, 0)
+  })
+  
+  TextShape.create(playerSign)
 
-  // const currentPlayer = Player.getOrNull(currentPlayerEntity)
+  syncEntity(playerSign, [TextShape.componentId], 3001)
 
-  // if (!currentPlayer) {
   Player.create(currentPlayerEntity)
-
-  syncEntity(currentPlayerEntity, [Player.componentId], 33)
-  // }
+  syncEntity(currentPlayerEntity, [Player.componentId], 3002)
 }
 
 
-function updateTextShape() {
-
+function updateMovesCounter() {
   TextShape.createOrReplace(movesSign, {
     text: `${movesHistory.length} moves`,
   })
@@ -106,7 +111,7 @@ function updateTextShape() {
 function undo() {
   const [entity, disc] = movesHistory.pop()
   landDisc(entity, disc.currentTower)
-  updateTextShape()
+  updateMovesCounter()
 }
 
 function onTowerClick(towerNumber: number) {
@@ -142,7 +147,7 @@ function validateMove(tower: number) {
   //move is valid
   if (selected[1].size < towerMinSize) {
     movesHistory.push(selected)
-    updateTextShape()
+    updateMovesCounter()
 
     landDisc(selected[0], tower)
 
@@ -250,9 +255,6 @@ function elevateDisc(discEntity: Entity) {
   })
 }
 
-
-
-
 function validateCurrentPlayer() {
   console.log("validating current player")
   const playerData = getPlayer()
@@ -261,7 +263,10 @@ function validateCurrentPlayer() {
   console.log(currentPlayer)
 
   if (playerData && (!currentPlayer.address || currentPlayer.address === playerData.userId)) {
-    Player.getMutable(currentPlayerEntity).address = playerData.userId
+    const player = Player.getMutable(currentPlayerEntity)
+    player.address = playerData.userId
+    player.name = playerData.name
+    TextShape.getMutable(playerSign).text = `Currently playing ${playerData.name}`
     return true
   }
 
@@ -275,9 +280,9 @@ function initDiscs() {
     const entity = engine.addEntity()
 
     // Transform.create(entity, { position: { x: 11.25, y: -5, z: 13 }, scale: { x: i, y: 0.3, z: i } })
-    Transform.create(entity, { position: { x: 11.25, y: -5, z: towerLocations[1] }})
+    Transform.create(entity, { position: { x: 11.25, y: -5, z: towerLocations[1] } })
     // MeshRenderer.setCylinder(entity)
-    GltfContainer.create(entity, {src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS})
+    GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
     // MeshCollider.setCylinder(entity)
     // Material.setPbrMaterial(entity, { albedoColor: Color4.fromHexString(getRandomHexColor()) })
     Disc.create(entity, {
@@ -289,7 +294,7 @@ function initDiscs() {
     syncEntity(
       entity,
       [Transform.componentId, MeshRenderer.componentId, Material.componentId, Disc.componentId],
-      100 + i
+      5000 + i
     )
   }
 
@@ -320,6 +325,6 @@ function startLevel(levelN: number) {
       Disc.getMutable(entity).currentTower = 0
     }
     movesHistory = []
-    updateTextShape()
+    updateMovesCounter()
   }
 }
