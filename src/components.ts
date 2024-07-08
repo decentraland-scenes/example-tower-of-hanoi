@@ -7,6 +7,6 @@ export const Disc = engine.defineComponent('disc', {
 })
 
 export const Player = engine.defineComponent('player', {
-    address: Schemas.String,
+    id: Schemas.String,
     name: Schemas.String
 })
