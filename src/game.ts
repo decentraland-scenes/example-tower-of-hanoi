@@ -111,7 +111,7 @@ export function initGame() {
 
   syncEntity(currentPlayerEntity, [Player.componentId], 3002)
   
-  Player.onChange(currentPlayerEntity, (data: any) => console.log(data))
+  // Player.onChange(currentPlayerEntity, (data: any) => console.log(data))
 
   const gameAreaCollider = engine.addEntity()
 
@@ -285,11 +285,13 @@ export function initGame() {
 
       clearSelection()
 
-      if (tower === 2) {
+      if (tower === 3) {
         //validate win
-        const discs = [...engine.getEntitiesWith(Disc)]
-        const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 2)
+        const discs = [...engine.getEntitiesWith(Disc)].filter(disc => disc[1]["currentTower"] !== 0)
+        const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 3)
 
+        // console.log("discs: ", discs)
+        // console.log("towerDiscs: ", towerDiscs)
         if (towerDiscs.length === discs.length) {
           console.log("win")
         }

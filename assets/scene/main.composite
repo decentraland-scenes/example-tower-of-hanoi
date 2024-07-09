@@ -335,7 +335,7 @@
         "514": {
           "json": {
             "src": "assets/scene/floor.glb",
-            "visibleMeshesCollisionMask": 1,
+            "visibleMeshesCollisionMask": 2,
             "invisibleMeshesCollisionMask": 2
           }
         },
