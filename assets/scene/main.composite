@@ -115,19 +115,14 @@
           "json": {
             "position": {
               "x": 8,
-              "y": -0.1639692336320877,
+              "y": 0,
               "z": 8
             },
             "rotation": {
               "x": 0,
-              "y": -0.7071067690849304,
+              "y": 0.7071067690849304,
               "z": 0,
-              "w": 0.7071067690849304
-            },
-            "scale": {
-              "x": 0.9999999403953552,
-              "y": 1,
-              "z": 0.9999999403953552
+              "w": -0.7071067690849304
             },
             "scale": {
               "x": 1,
@@ -198,90 +193,6 @@
               "w": 1
             },
             "parent": 547
-          }
-        },
-        "534": {
-          "json": {
-            "position": {
-              "x": 4.75,
-              "y": 1,
-              "z": 0.4000000059604645
-            },
-            "scale": {
-              "x": 7,
-              "y": 5,
-              "z": 1
-            },
-            "rotation": {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "w": 1
-            },
-            "parent": 0
-          }
-        },
-        "535": {
-          "json": {
-            "position": {
-              "x": 4.75,
-              "y": 1,
-              "z": 15.699999809265137
-            },
-            "scale": {
-              "x": 7,
-              "y": 5,
-              "z": 1
-            },
-            "rotation": {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "w": 1
-            },
-            "parent": 0
-          }
-        },
-        "537": {
-          "json": {
-            "position": {
-              "x": 3,
-              "y": 5.25,
-              "z": 15.5
-            },
-            "scale": {
-              "x": 1,
-              "y": 1,
-              "z": 1
-            },
-            "rotation": {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "w": 1
-            },
-            "parent": 0
-          }
-        },
-        "538": {
-          "json": {
-            "position": {
-              "x": 3,
-              "y": 5.25,
-              "z": 0.5
-            },
-            "scale": {
-              "x": 1,
-              "y": 1,
-              "z": 1
-            },
-            "rotation": {
-              "x": 0,
-              "y": 1,
-              "z": 0,
-              "w": 6.123234262925839e-17
-            },
-            "parent": 0
           }
         },
         "547": {
@@ -413,37 +324,6 @@
       }
     },
     {
-      "name": "core-schema::Network-Entity",
-      "jsonSchema": {
-        "type": "object",
-        "properties": {
-          "networkId": {
-            "type": "integer",
-            "serializationType": "int64"
-          },
-          "entityId": {
-            "type": "integer",
-            "serializationType": "entity"
-          }
-        },
-        "serializationType": "map"
-      },
-      "data": {
-        "537": {
-          "json": {
-            "networkId": 0,
-            "entityId": 537
-          }
-        },
-        "538": {
-          "json": {
-            "networkId": 0,
-            "entityId": 538
-          }
-        }
-      }
-    },
-    {
       "name": "core::GltfContainer",
       "jsonSchema": {
         "type": "object",
@@ -455,7 +335,7 @@
         "514": {
           "json": {
             "src": "assets/scene/floor.glb",
-            "visibleMeshesCollisionMask": 2,
+            "visibleMeshesCollisionMask": 1,
             "invisibleMeshesCollisionMask": 2
           }
         },
@@ -484,20 +364,6 @@
           "json": {
             "src": "assets/scene/plank.glb",
             "visibleMeshesCollisionMask": 2,
-            "invisibleMeshesCollisionMask": 2
-          }
-        },
-        "534": {
-          "json": {
-            "src": "assets/builder/cushion_-_cream/CreamCushion.glb",
-            "visibleMeshesCollisionMask": 1,
-            "invisibleMeshesCollisionMask": 2
-          }
-        },
-        "535": {
-          "json": {
-            "src": "assets/builder/cushion_-_cream/CreamCushion.glb",
-            "visibleMeshesCollisionMask": 1,
             "invisibleMeshesCollisionMask": 2
           }
         }
@@ -624,26 +490,6 @@
             "value": "plank"
           }
         },
-        "534": {
-          "json": {
-            "value": "Scroreboard"
-          }
-        },
-        "535": {
-          "json": {
-            "value": "Scroreboard_1"
-          }
-        },
-        "537": {
-          "json": {
-            "value": "Text_1"
-          }
-        },
-        "538": {
-          "json": {
-            "value": "Text_1_2"
-          }
-        },
         "547": {
           "json": {
             "value": "base1"
@@ -672,104 +518,6 @@
         "560": {
           "json": {
             "value": "click_tower_3"
-          }
-        }
-      }
-    },
-    {
-      "name": "core-schema::Sync-Components",
-      "jsonSchema": {
-        "type": "object",
-        "properties": {
-          "componentIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "serializationType": "int64"
-            },
-            "serializationType": "array"
-          }
-        },
-        "serializationType": "map"
-      },
-      "data": {
-        "537": {
-          "json": {
-            "componentIds": [
-              1030,
-              1081
-            ]
-          }
-        },
-        "538": {
-          "json": {
-            "componentIds": [
-              1030,
-              1081
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "core::TextShape",
-      "jsonSchema": {
-        "type": "object",
-        "properties": {},
-        "serializationType": "protocol-buffer",
-        "protocolBuffer": "PBTextShape"
-      },
-      "data": {
-        "537": {
-          "json": {
-            "text": "Rules",
-            "font": 2,
-            "fontSize": 15,
-            "fontAutoSize": false,
-            "textAlign": 4,
-            "paddingTop": 0,
-            "paddingRight": 0,
-            "paddingBottom": 0,
-            "paddingLeft": 0,
-            "lineSpacing": 0,
-            "outlineWidth": 0,
-            "outlineColor": {
-              "r": 1,
-              "g": 1,
-              "b": 1
-            },
-            "textColor": {
-              "r": 1,
-              "g": 1,
-              "b": 1,
-              "a": 1
-            }
-          }
-        },
-        "538": {
-          "json": {
-            "text": "Score",
-            "font": 2,
-            "fontSize": 15,
-            "fontAutoSize": false,
-            "textAlign": 4,
-            "paddingTop": 0,
-            "paddingRight": 0,
-            "paddingBottom": 0,
-            "paddingLeft": 0,
-            "lineSpacing": 0,
-            "outlineWidth": 0,
-            "outlineColor": {
-              "r": 1,
-              "g": 1,
-              "b": 1
-            },
-            "textColor": {
-              "r": 1,
-              "g": 1,
-              "b": 1,
-              "a": 1
-            }
           }
         }
       }
@@ -1181,10 +929,6 @@
                 "entity": 0,
                 "open": true,
                 "children": [
-                  534,
-                  535,
-                  537,
-                  538,
                   547,
                   552,
                   554,
@@ -1198,22 +942,6 @@
               },
               {
                 "entity": 2,
-                "children": []
-              },
-              {
-                "entity": 534,
-                "children": []
-              },
-              {
-                "entity": 535,
-                "children": []
-              },
-              {
-                "entity": 537,
-                "children": []
-              },
-              {
-                "entity": 538,
                 "children": []
               },
               {
@@ -1547,18 +1275,6 @@
           "json": {}
         },
         "518": {
-          "json": {}
-        },
-        "534": {
-          "json": {}
-        },
-        "535": {
-          "json": {}
-        },
-        "537": {
-          "json": {}
-        },
-        "538": {
           "json": {}
         },
         "547": {

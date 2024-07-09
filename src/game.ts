@@ -49,7 +49,7 @@ export function initGame() {
     () => startLevel(6)
   )
 
-  const undoButton = new MenuButton({
+  new MenuButton({
     position: Vector3.create(14.9, 4.30, 6),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
@@ -149,24 +149,25 @@ export function initGame() {
   )
 
 
-  //functions declarations
-
+  
   //Game Loop
   let elapsedTime = 0
   const gameLoopFreq = 1
-
+  
   engine.addSystem((dt: number) => {
     elapsedTime += dt
-
+    
     if (elapsedTime >= gameLoopFreq) {
       elapsedTime = 0
       updateTexts()
       checkTimer()
       checkPlayerIsAlive()
-
+      
     }
   })
+  
 
+  //functions declarations
   function checkPlayerIsAlive() {
     const playerData = Player.get(currentPlayerEntity)
     if (playerData.id !== '') {
