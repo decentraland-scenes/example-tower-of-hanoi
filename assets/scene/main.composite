@@ -136,19 +136,19 @@
           "json": {
             "position": {
               "x": 8,
-              "y": 0,
+              "y": -0.1639692336320877,
               "z": 8
-            },
-            "scale": {
-              "x": 1,
-              "y": 1,
-              "z": 1
             },
             "rotation": {
               "x": 0,
-              "y": 0.7071067690849304,
+              "y": -0.7071067690849304,
               "z": 0,
-              "w": -0.7071067690849304
+              "w": 0.7071067690849304
+            },
+            "scale": {
+              "x": 0.9999999403953552,
+              "y": 1,
+              "z": 0.9999999403953552
             },
             "parent": 0
           }
@@ -555,7 +555,7 @@
         "514": {
           "json": {
             "src": "assets/scene/floor.glb",
-            "visibleMeshesCollisionMask": 1,
+            "visibleMeshesCollisionMask": 2,
             "invisibleMeshesCollisionMask": 2
           }
         },
@@ -1313,7 +1313,7 @@
         "serializationType": "map"
       },
       "data": {
-        "514": {
+        "515": {
           "json": {
             "gizmo": 0
           }
