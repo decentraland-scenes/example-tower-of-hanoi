@@ -16,6 +16,34 @@ Transform.create(backSign, {
   scale: Vector3.create(1, 1, 1),
   rotation: Quaternion.fromEulerDegrees(0, -90, 0)
 })
+let sideSignA = engine.addEntity()
+
+GltfContainer.create(sideSignA, { src: "assets/scene/sideSign.glb"
+  // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
+  // visibleMeshesCollisionMask:
+  //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
+ })
+
+Transform.create(sideSignA, {
+  position: Vector3.create(2.5, 0, 14),
+  scale: Vector3.create(1, 1, 1),
+  rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+})
+let sideSignB = engine.addEntity()
+
+GltfContainer.create(sideSignB, { src: "assets/scene/sideSign.glb"
+  // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
+  // visibleMeshesCollisionMask:
+  //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
+ })
+
+Transform.create(sideSignB, {
+  position: Vector3.create(2.5, 0, 2),
+  scale: Vector3.create(1, 1, 1),
+  rotation: Quaternion.fromEulerDegrees(0, 0, 0)
+})
+
+
 
     initGame()
 }
