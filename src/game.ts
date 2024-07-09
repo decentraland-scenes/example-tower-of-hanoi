@@ -15,20 +15,6 @@ const towerLocations = [-1, 11.75, 8, 4.25]
 const sessionMaxTime = 300
 let sessionRemainingTime = sessionMaxTime
 
-let backSign = engine.addEntity()
-
-GltfContainer.create(backSign, { src: "assets/scene/backSign.glb"
-  // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
-  // visibleMeshesCollisionMask:
-  //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
- })
-
-Transform.create(backSign, {
-  position: Vector3.create(15, 0, 8),
-  scale: Vector3.create(1, 1, 1),
-  rotation: Quaternion.fromEulerDegrees(0, -90, 0)
-})
-
 export function initGame() {
   const textEntity = engine.addEntity()
   const currentPlayerEntity = engine.addEntity()
