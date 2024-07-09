@@ -1,57 +1,63 @@
-// We define the empty imports so the auto-complete feature works as expected.
-import { Color4, Quaternion, Vector3 } from '@dcl/sdk/math'
-import { ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBMeshCollider, PointerEvents, Schemas, TextShape, Transform, TransformType, Tween, TweenLoop, TweenSequence, engine, pointerEventsSystem, tweenSystem } from '@dcl/sdk/ecs'
+import { Quaternion, Vector3 } from '@dcl/sdk/math'
+import { CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PlayerIdentityData, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/src/players'
-import * as utils from '@dcl-sdk/utils'
 
 import { Disc, Player } from './components'
 import { movePlayerTo } from '~system/RestrictedActions'
+import { MenuButton } from './minigame-ui/button'
+import { iconData } from './minigame-ui/resources'
 
 let movesHistory: any = []
 const maxDiscs = 7
 const towerLocations = [-1, 11.75, 8, 4.25]
 const sessionMaxTime = 300
-let sessionRemainingTime = sessionMaxTime
 
 export function initGame() {
-  const textEntity = engine.addEntity()
-  const currentPlayerEntity = engine.addEntity()
 
-  const levelButtons = ["spawn_level_1", "spawn_level_2", "spawn_level_3"]
+  const level1Button = new MenuButton({
+    position: Vector3.create(14.9, 4.30, 9.75),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    iconData.shapes.SQUARE_GREEN,
+    iconData.numbers[1],
+    "START LEVEL 1",
+    () => startLevel(4)
+  )
 
-  for (const button of levelButtons) {
+  const level2Button = new MenuButton({
+    position: Vector3.create(14.9, 4.30, 9),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    iconData.shapes.SQUARE_GREEN,
+    iconData.numbers[2],
+    "START LEVEL 2",
+    () => startLevel(5)
+  )
 
-    const entity = engine.getEntityOrNullByName(button)
+  const level3Button = new MenuButton({
+    position: Vector3.create(14.9, 4.30, 8.25),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    iconData.shapes.SQUARE_GREEN,
+    iconData.numbers[3],
+    "START LEVEL 3",
+    () => startLevel(6)
+  )
 
-    entity && pointerEventsSystem.onPointerDown(
-      {
-        entity: entity,
-        opts: {
-          button: InputAction.IA_POINTER,
-          hoverText: `Start level ${levelButtons.indexOf(button) + 1}`
-        }
-      },
-      function () {
-        startLevel(levelButtons.indexOf(button) + 4)
-      }
-    )
-  }
-
-  const undoEntity = engine.getEntityOrNullByName("Black_Button")
-
-  undoEntity && pointerEventsSystem.onPointerDown(
-    {
-      entity: undoEntity,
-      opts: {
-        button: InputAction.IA_POINTER,
-        hoverText: `Undo`
-      }
-    },
-    function () {
-      undo()
-    }
+  const undoButton = new MenuButton({
+    position: Vector3.create(14.9, 4.30, 6),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    iconData.shapes.SQUARE_RED,
+    iconData.icons.undo,
+    "UNDO LAST MOVE",
+    () => undo()
   )
 
   //add click trigger for towers
@@ -66,7 +72,7 @@ export function initGame() {
         entity: entity,
         opts: {
           button: InputAction.IA_POINTER,
-          hoverText: `tower ${towers.indexOf(tower)}`,
+          hoverText: `SELECT TOWER ${towers.indexOf(tower)}`,
           maxDistance: 15
         }
       },
@@ -78,87 +84,155 @@ export function initGame() {
 
 
   //create moves board
-  Transform.create(textEntity, {
-    position: Vector3.create(15.5, 3, 8),
+  const movesTextEntity = engine.addEntity()
+
+  Transform.create(movesTextEntity, {
+    position: Vector3.create(14.85, 5.05, 5.4),
     rotation: Quaternion.fromEulerDegrees(0, 90, 0)
   })
 
-  TextShape.create(textEntity, {
-    text: ''
+  const timeTextEntity = engine.addEntity()
+
+  Transform.create(timeTextEntity, {
+    position: Vector3.create(14.85, 5.05, 6.6),
+    rotation: Quaternion.fromEulerDegrees(0, 90, 0)
   })
 
-  syncEntity(textEntity, [TextShape.componentId], 3000)
+  const currentPlayerTextEntity = engine.addEntity()
 
-  Player.create(currentPlayerEntity, { id: '', name: '' })
+  Transform.create(currentPlayerTextEntity, {
+    position: Vector3.create(14.85, 5.05, 9.8),
+    rotation: Quaternion.fromEulerDegrees(0, 90, 0)
+  })
+
+  const currentPlayerEntity = engine.addEntity()
+
+  Player.create(currentPlayerEntity, { id: '', name: '', currentLevel: -1 })
 
   syncEntity(currentPlayerEntity, [Player.componentId], 3002)
+  
+  Player.onChange(currentPlayerEntity, (data: any) => console.log(data))
 
-  const triggerAreaEntity = engine.addEntity()
+  const gameAreaCollider = engine.addEntity()
 
-  Transform.create(triggerAreaEntity, {
-    position: Vector3.create(8, 0, 8),
-    scale: Vector3.create(12, 16, 12)
+  Transform.create(gameAreaCollider, {
+    position: Vector3.create(9.5, 0, 8),
+    scale: Vector3.create(9.75, 16, 12.5)
   })
 
-  syncEntity(triggerAreaEntity, [MeshCollider.componentId], triggerAreaEntity)
+  // MeshRenderer.setBox(triggerAreaEntity)
+  MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
 
-  utils.triggers.addTrigger(
-    triggerAreaEntity,
-    utils.NO_LAYERS,
-    utils.LAYER_1,
-    [
-      {
-        type: 'box',
-        scale: Vector3.create(12.5, 16, 12.5)
-      }
-    ],
-    () => {
-      console.log("player enters scene")
-      if (!validateCurrentPlayer()) {
-        MeshCollider.setBox(triggerAreaEntity, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
-      } else {
-        MeshCollider.deleteFrom(triggerAreaEntity)
-        engine.addSystem(playerTimer)
-      }
+  CameraModeArea.create(gameAreaCollider, {
+    area: Vector3.create(9.75, 10, 12.5),
+    mode: CameraType.CT_FIRST_PERSON
+  })
+
+
+
+  // enter to game area button 
+  new MenuButton(
+    {
+      position: Vector3.create(4.35, 1, 8),
+      rotation: Quaternion.fromEulerDegrees(-45, 90, 0),
+      scale: Vector3.create(1, 1, 1)
     },
+    iconData.shapes.RECT_GREEN,
+    iconData.icons.play,
+    "PLAY GAME",
     () => {
-      onPlayerLeavesScene()
-    },
+      if (setCurrentPlayer()) {
+        movePlayerTo({ newRelativePosition: Vector3.create(5.5, 2, 8), cameraTarget: Vector3.create(7, 2, 9) })
+        startLevel(-1)
+      }
+    }
   )
+
 
   //functions declarations
 
-  function onPlayerLeavesScene() {
-    const playerData = getPlayer()
-    const player = Player.get(currentPlayerEntity)
-    console.log("player leaves scene")
-    if (playerData?.userId === player.id)
-      Player.createOrReplace(currentPlayerEntity, { id: '', name: '' })
-    console.log("removing collider")
-    MeshCollider.deleteFrom(triggerAreaEntity)
-    sessionRemainingTime = sessionMaxTime
+  //Game Loop
+  let elapsedTime = 0
+  const gameLoopFreq = 1
 
-  }
+  engine.addSystem((dt: number) => {
+    elapsedTime += dt
 
-  function playerTimer(dt: number) {
-    sessionRemainingTime -= dt
-    updateMovesCounter()
+    if (elapsedTime >= gameLoopFreq) {
+      elapsedTime = 0
+      updateTexts()
+      checkTimer()
+      checkPlayerIsAlive()
 
-    if (sessionRemainingTime <= 0) {
-      sessionRemainingTime = sessionMaxTime
-      onPlayerLeavesScene()
-      engine.removeSystem(playerTimer)
-      movePlayerTo({newRelativePosition: Vector3.create(1, 0, 8)})
+    }
+  })
+
+  function checkPlayerIsAlive() {
+    const playerData = Player.get(currentPlayerEntity)
+    if (playerData.id !== '') {
+      const players = [...engine.getEntitiesWith(PlayerIdentityData, Transform)]
+      const playerInsideGame = players.find(([entity, data, transform]) => {
+        if (data.address === playerData.id) {
+          if (transform.position.z >= 2.23 && transform.position.z <= 13.77) {
+            if (transform.position.x >= 5.15 && transform.position.x <= 13.77) {
+              return true
+            }
+          }
+        }
+      })
+
+      if (!playerInsideGame?.length) {
+        clearPlayerData()
+      }
     }
   }
 
-  function updateMovesCounter() {
-    const playerData = Player.get(currentPlayerEntity)
-    const minutes = Math.floor(sessionRemainingTime / 60)
-    const seconds = Math.round(sessionRemainingTime) - minutes * 60
+  function clearPlayerData() {
+    Player.createOrReplace(currentPlayerEntity, { id: '', name: '', moves: 0 })
+  }
 
-    TextShape.createOrReplace(textEntity, {
-      text: `${movesHistory.length} moves${playerData.name ? `\nCurrent Player: ${playerData.name}\nRemaining time: ${minutes}:${seconds}` : ''}`,
+  function checkTimer() {
+    const playerData = Player.get(currentPlayerEntity)
+
+    if (playerData.id !== '') {
+
+      const now = Date.now()
+      if (now - parseInt(playerData.arrivedAt) >= sessionMaxTime * 1000) {
+        clearPlayerData()
+        movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
+      }
+    }
+  }
+
+  function updateTexts() {
+    const playerData = Player.get(currentPlayerEntity)
+// console.log("Date.now(): ", Date.now())
+// console.log("playerData.levelStartedAt: ", playerData.levelStartedAt)
+    const gameElapsedTime = (Date.now() - parseInt(playerData.levelStartedAt)) / 1000
+    const minutes = Math.floor(gameElapsedTime / 60)
+    const seconds = Math.round(gameElapsedTime) - minutes * 60
+
+    TextShape.createOrReplace(currentPlayerTextEntity, {
+      text: `${playerData.name}`,
+      fontSize: 3
+    })
+
+    if (playerData.currentLevel > 0) {
+      TextShape.createOrReplace(timeTextEntity, {
+        text: `${minutes}:${seconds}`,
+        fontSize: 3
+      })
+    } else {
+      TextShape.createOrReplace(timeTextEntity, {
+        text: '',
+        fontSize: 3
+      })
+
+    }
+
+     TextShape.createOrReplace(movesTextEntity, {
+      text: `${playerData.moves}`,
+      fontSize: 3
     })
 
   }
@@ -166,7 +240,8 @@ export function initGame() {
   function undo() {
     const [entity, disc] = movesHistory.pop()
     landDisc(entity, disc.currentTower)
-    updateMovesCounter()
+    Player.getMutable(currentPlayerEntity).moves = movesHistory.length
+    // updateMovesCounter()
   }
 
   function onTowerClick(towerNumber: number) {
@@ -202,7 +277,8 @@ export function initGame() {
     //move is valid
     if (selected[1].size < towerMinSize) {
       movesHistory.push(selected)
-      updateMovesCounter()
+      Player.getMutable(currentPlayerEntity).moves = movesHistory.length
+      // updateMovesCounter()
 
       landDisc(selected[0], tower)
 
@@ -234,7 +310,7 @@ export function initGame() {
         start: discTransform.position,
         end: { ...discTransform.position, y: 3 }
       }),
-      duration: 100,
+      duration: 50,
       easingFunction: EasingFunction.EF_LINEAR,
     })
 
@@ -245,7 +321,7 @@ export function initGame() {
             start: { ...discTransform.position, y: 3 },
             end: { ...discTransform.position, y: 3, z: towerLocations[tower] }
           }),
-          duration: 300,
+          duration: 50,
           easingFunction: EasingFunction.EF_EASEOUTEXPO
         },
         {
@@ -315,16 +391,28 @@ export function initGame() {
 
     const currentPlayer = Player.get(currentPlayerEntity)
     // console.log("currentPlayer.id: ", currentPlayer.id)
-    playerData && console.log("playerData.userId: ", playerData.userId)
+    // playerData && console.log("playerData.userId: ", playerData.userId)
 
-    if (playerData && (currentPlayer.id === '' || currentPlayer.id === playerData.userId)) {
-      Player.createOrReplace(currentPlayerEntity, { id: playerData.userId, name: playerData.name })
-      // console.log("true")
+    if (!playerData) return false
+
+    if (currentPlayer.id === playerData.userId) {
       return true
-    } else {
-      // console.log("false")
-      return false
     }
+
+    return false
+  }
+
+  function setCurrentPlayer() {
+    const playerData = getPlayer()
+    const currentPlayer = Player.get(currentPlayerEntity)
+    if (!playerData) return false
+
+    if (currentPlayer.id === '') {
+      Player.createOrReplace(currentPlayerEntity, { id: playerData.userId, name: playerData.name, arrivedAt: `${Date.now()}` })
+      return true
+    }
+
+    return false
 
   }
 
@@ -356,10 +444,12 @@ export function initGame() {
 
     clearSelection()
 
+    const playerData = Player.getMutable(currentPlayerEntity)
+
+    playerData.levelStartedAt = `${Date.now()}`
+    playerData.currentLevel = levelN
+
     const discs = [...engine.getEntitiesWith(Disc)]
-    // for (const [entity] of discs) {
-    //   engine.removeEntityWithChildren(entity)
-    // }
 
     for (var i = 0; i <= maxDiscs - 1; i++) {
 
@@ -375,7 +465,6 @@ export function initGame() {
         Disc.getMutable(entity).currentTower = 0
       }
       movesHistory = []
-      updateMovesCounter()
     }
   }
 }

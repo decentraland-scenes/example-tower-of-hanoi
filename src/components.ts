@@ -8,5 +8,9 @@ export const Disc = engine.defineComponent('disc', {
 
 export const Player = engine.defineComponent('player', {
     id: Schemas.String,
-    name: Schemas.String
+    name: Schemas.String,
+    arrivedAt: Schemas.String,
+    moves: Schemas.Number,
+    levelStartedAt: Schemas.String,
+    currentLevel: Schemas.Number
 })
