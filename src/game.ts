@@ -313,7 +313,7 @@ export function initGame() {
         start: discTransform.position,
         end: { ...discTransform.position, y: 3 }
       }),
-      duration: 50,
+      duration: 10,
       easingFunction: EasingFunction.EF_LINEAR,
     })
 
@@ -324,7 +324,7 @@ export function initGame() {
             start: { ...discTransform.position, y: 3 },
             end: { ...discTransform.position, y: 3, z: towerLocations[tower] }
           }),
-          duration: 50,
+          duration: 300,
           easingFunction: EasingFunction.EF_EASEOUTEXPO
         },
         {
@@ -333,7 +333,7 @@ export function initGame() {
             end: { ...discTransform.position, y: getLandingHeight(towerEntities.length - 1), z: towerLocations[tower] }
           }),
           duration: 300,
-          easingFunction: EasingFunction.EF_EASEINEXPO
+          easingFunction: EasingFunction.EF_EASEOUTEXPO
         },
       ]
     })
@@ -383,8 +383,9 @@ export function initGame() {
         start: selectedTransform.position,
         end: { ...selectedTransform.position, y: 3 }
       }),
-      duration: 1000,
-      easingFunction: EasingFunction.EF_LINEAR,
+      duration: 300,
+      //go up
+      easingFunction: EasingFunction.EF_EASEOUTQUAD,
     })
   }
 
