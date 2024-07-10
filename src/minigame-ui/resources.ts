@@ -1,15 +1,16 @@
 
 export type IconData = {    
-    uvs:number[]
+    uvs:number[],
+    blockWidth:number
 }
 export type ButtonShapeData = {
     shape:string,
     base:string,
     isRect:boolean
 }
-export type uvData = {
-    shape:string,    
-}
+// export type uvData = {
+//     shape:string,    
+// }
 
 function getUVs(row:number, startBlock:number, width:number):number[]{
      let blockSize = 1/16
@@ -52,41 +53,59 @@ export let uiAtlas = 'images/AtlasGames.png'
 
 
 //square icons
-let checkmark:IconData ={ uvs:getUVs(0, 0, 1)}   
-let close:IconData ={ uvs:getUVs(0, 1, 1)} 
-let restart:IconData ={ uvs:getUVs(0, 2, 1)} 
-let play:IconData ={ uvs:getUVs(0, 3, 1)} 
-let timer:IconData ={ uvs:getUVs(0, 4, 1)} 
-let clock:IconData ={ uvs:getUVs(0, 5, 1)} 
-let results:IconData ={ uvs:getUVs(0, 6, 1)} 
-let sound:IconData ={ uvs:getUVs(0, 7, 1)} 
-let music:IconData ={ uvs:getUVs(0, 8, 1)} 
-let flag:IconData ={ uvs:getUVs(0, 9, 1)} 
-let leftArrow:IconData ={uvs:getUVs(0, 10, 1)} 
-let rightArrow:IconData ={ uvs:getUVs(0, 11, 1)} 
-let upArrow:IconData ={ uvs:getUVs(0, 12, 1)} 
-let downArrow:IconData ={ uvs:getUVs(0, 13, 1)} 
-let hint:IconData ={ uvs:getUVs(0, 14, 1)} 
-let menu:IconData ={ uvs:getUVs(0, 15, 1)}
-let undo:IconData ={ uvs:getUVs(1, 2, 1)}
+let checkmark:IconData ={ uvs:getUVs(0, 0, 1), blockWidth: 1}   
+let close:IconData ={ uvs:getUVs(0, 1, 1), blockWidth: 1} 
+let restart:IconData ={ uvs:getUVs(0, 2, 1), blockWidth: 1} 
+let play:IconData ={ uvs:getUVs(0, 3, 1), blockWidth: 1} 
+let timer:IconData ={ uvs:getUVs(0, 4, 1), blockWidth: 1} 
+let clock:IconData ={ uvs:getUVs(0, 5, 1), blockWidth: 1} 
+let results:IconData ={ uvs:getUVs(0, 6, 1), blockWidth: 1} 
+let sound:IconData ={ uvs:getUVs(0, 7, 1), blockWidth: 1} 
+let music:IconData ={ uvs:getUVs(0, 8, 1), blockWidth: 1} 
+let flag:IconData ={ uvs:getUVs(0, 9, 1), blockWidth: 1} 
+let leftArrow:IconData ={uvs:getUVs(0, 10, 1), blockWidth: 1} 
+let rightArrow:IconData ={ uvs:getUVs(0, 11, 1), blockWidth: 1} 
+let upArrow:IconData ={ uvs:getUVs(0, 12, 1), blockWidth: 1} 
+let downArrow:IconData ={ uvs:getUVs(0, 13, 1), blockWidth: 1} 
+let hint:IconData ={ uvs:getUVs(0, 14, 1), blockWidth: 1} 
+let menu:IconData ={ uvs:getUVs(0, 15, 1), blockWidth: 1}
+let person:IconData ={ uvs:getUVs(1, 0, 1), blockWidth: 1}
+let retry:IconData ={ uvs:getUVs(1, 1, 1), blockWidth: 1}
+let undo:IconData ={ uvs:getUVs(1, 2, 1), blockWidth: 1}
+let moves:IconData ={ uvs:getUVs(1, 3, 1), blockWidth: 1}
+let lock:IconData ={ uvs:getUVs(1, 4, 1), blockWidth: 1}
 
 // numbers
 let numbers:IconData[] = []
 for(let i=0; i<10; i++){
-    numbers.push({ uvs:getUVs(2, i, 1) })
+    numbers.push({ uvs:getUVs(2, i, 1), blockWidth: 1 })
 }
 
-let hashtag:IconData ={ uvs:getUVs(2, 10, 1)} 
-let atSign:IconData ={ uvs:getUVs(2, 11, 1)} 
-let dot:IconData ={ uvs:getUVs(2, 12, 1)} 
-let parenthesesLeft :IconData ={ uvs:getUVs(2, 13, 1)} 
-let parenthesesRight:IconData ={ uvs:getUVs(2, 14, 1)}
-let exclamation:IconData ={ uvs:getUVs(2, 15, 1)}
+let hashtag:IconData ={ uvs:getUVs(2, 10, 1), blockWidth: 1} 
+let atSign:IconData ={ uvs:getUVs(2, 11, 1), blockWidth: 1} 
+let dot:IconData ={ uvs:getUVs(2, 12, 1), blockWidth: 1} 
+let parenthesesLeft :IconData ={ uvs:getUVs(2, 13, 1), blockWidth: 1} 
+let parenthesesRight:IconData ={ uvs:getUVs(2, 14, 1), blockWidth: 1}
+let exclamation:IconData ={ uvs:getUVs(2, 15, 1), blockWidth: 1}
+
+
+
+let scoreText:IconData ={ uvs:getUVs(3, 0, 3), blockWidth: 3}
+let levelText:IconData ={ uvs:getUVs(3, 3, 3), blockWidth: 3}
+let timeText:IconData ={ uvs:getUVs(3, 6, 3), blockWidth: 3}
+let progressText:IconData = { uvs:getUVs(3, 9, 4), blockWidth: 4}
+let exitText:IconData ={ uvs:getUVs(3, 13, 3), blockWidth: 3}
+
+let scoreBoardText:IconData ={ uvs:getUVs(4, 0, 5), blockWidth: 5}
+let instructionsText:IconData ={ uvs:getUVs(4, 5, 5), blockWidth: 5}
+let playText:IconData ={ uvs:getUVs(4, 10, 3), blockWidth: 3}
+
+
 
 
 
   
-export let iconData = {
+export let uiAssets = {
        icons:{            
             checkmark,
             close,
@@ -104,13 +123,26 @@ export let iconData = {
             downArrow,
             hint,
             menu,
+            person,
+            retry,
+            undo,
+            moves,
+            lock,
             hashtag,
             atSign,
             dot,
             parenthesesLeft,
             parenthesesRight,
             exclamation,
-            undo
+            scoreText,
+            levelText,
+            timeText,
+            progressText,
+            exitText,
+            scoreBoardText,
+            instructionsText,
+            playText           
+
         },        
         shapes:{
             SQUARE_GREEN,
