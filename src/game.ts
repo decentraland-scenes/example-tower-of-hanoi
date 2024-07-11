@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 
@@ -186,41 +186,51 @@ function validateMove(tower: number) {
 
 function landDisc(entity: Entity, tower: number) {
 
-  Disc.getMutable(entity).currentTower = tower
+  const discData = Disc.getMutable(entity)
+
+  const sameTower = discData.currentTower === tower
+
+  discData.currentTower = tower
 
   const discTransform = Transform.get(entity)
 
   const towerEntities = [...engine.getEntitiesWith(Disc)].filter(([entity, disc]) => disc.currentTower === tower)
 
-  Tween.createOrReplace(entity, {
+  const horizontalTween = {
     mode: Tween.Mode.Move({
-      start: discTransform.position,
-      end: { ...discTransform.position, y: 3 }
+      start: { ...discTransform.position, y: 3 },
+      end: { ...discTransform.position, y: 3, z: towerLocations[tower] }
     }),
-    duration: 10,
-    easingFunction: EasingFunction.EF_LINEAR,
-  })
+    duration: 300,
+    easingFunction: EasingFunction.EF_EASEOUTEXPO
+  }
 
-  TweenSequence.createOrReplace(entity, {
-    sequence: [
-      {
-        mode: Tween.Mode.Move({
-          start: { ...discTransform.position, y: 3 },
-          end: { ...discTransform.position, y: 3, z: towerLocations[tower] }
-        }),
-        duration: 300,
-        easingFunction: EasingFunction.EF_EASEOUTEXPO
-      },
-      {
-        mode: Tween.Mode.Move({
-          start: { ...discTransform.position, y: 3, z: towerLocations[tower] },
-          end: { ...discTransform.position, y: getLandingHeight(towerEntities.length - 1), z: towerLocations[tower] }
-        }),
-        duration: 300,
-        easingFunction: EasingFunction.EF_EASEOUTEXPO
-      },
-    ]
-  })
+  const verticalTween = {
+    mode: Tween.Mode.Move({
+      start: { ...discTransform.position, y: 3, z: towerLocations[tower] },
+      end: { ...discTransform.position, y: getLandingHeight(towerEntities.length - 1), z: towerLocations[tower] }
+    }),
+    duration: 300,
+    easingFunction: EasingFunction.EF_EASEOUTEXPO
+  }
+
+  const tweensSequence: PBTween[] = []
+  
+  if (!sameTower) {
+    tweensSequence.push(horizontalTween)
+  }
+  
+  tweensSequence.push(verticalTween)
+
+  Tween.createOrReplace(entity, tweensSequence.shift())
+
+  if (tweensSequence.length) {
+    TweenSequence.createOrReplace(entity, {
+      sequence: [
+        ...tweensSequence
+      ]
+    })
+  }
 }
 
 function getLandingHeight(towerDiscsCount: number) {
