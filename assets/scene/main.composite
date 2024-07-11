@@ -90,48 +90,6 @@
         "serializationType": "transform"
       },
       "data": {
-        "514": {
-          "json": {
-            "position": {
-              "x": 8,
-              "y": 0,
-              "z": 8
-            },
-            "rotation": {
-              "x": 0,
-              "y": 0.7071067690849304,
-              "z": 0,
-              "w": -0.7071067690849304
-            },
-            "scale": {
-              "x": 1,
-              "y": 1,
-              "z": 1
-            },
-            "parent": 0
-          }
-        },
-        "515": {
-          "json": {
-            "position": {
-              "x": 8,
-              "y": 0,
-              "z": 8
-            },
-            "rotation": {
-              "x": 0,
-              "y": 0.7071067690849304,
-              "z": 0,
-              "w": -0.7071067690849304
-            },
-            "scale": {
-              "x": 1,
-              "y": 1,
-              "z": 1
-            },
-            "parent": 0
-          }
-        },
         "516": {
           "json": {
             "position": {
@@ -332,20 +290,6 @@
         "protocolBuffer": "PBGltfContainer"
       },
       "data": {
-        "514": {
-          "json": {
-            "src": "assets/scene/floor.glb",
-            "visibleMeshesCollisionMask": 2,
-            "invisibleMeshesCollisionMask": 2
-          }
-        },
-        "515": {
-          "json": {
-            "src": "assets/scene/fence.glb",
-            "visibleMeshesCollisionMask": 2,
-            "invisibleMeshesCollisionMask": 2
-          }
-        },
         "516": {
           "json": {
             "src": "assets/scene/plank.glb",
@@ -465,16 +409,6 @@
         "serializationType": "map"
       },
       "data": {
-        "514": {
-          "json": {
-            "value": "floor.glb"
-          }
-        },
-        "515": {
-          "json": {
-            "value": "fence.glb"
-          }
-        },
         "516": {
           "json": {
             "value": "plank"
@@ -518,26 +452,6 @@
         "560": {
           "json": {
             "value": "click_tower_3"
-          }
-        }
-      }
-    },
-    {
-      "name": "inspector::Selection",
-      "jsonSchema": {
-        "type": "object",
-        "properties": {
-          "gizmo": {
-            "type": "integer",
-            "serializationType": "int32"
-          }
-        },
-        "serializationType": "map"
-      },
-      "data": {
-        "515": {
-          "json": {
-            "gizmo": 0
           }
         }
       }
@@ -931,9 +845,7 @@
                 "children": [
                   547,
                   552,
-                  554,
-                  514,
-                  515
+                  554
                 ]
               },
               {
@@ -978,14 +890,6 @@
               },
               {
                 "entity": 560,
-                "children": []
-              },
-              {
-                "entity": 514,
-                "children": []
-              },
-              {
-                "entity": 515,
                 "children": []
               },
               {
@@ -1262,12 +1166,6 @@
         "serializationType": "map"
       },
       "data": {
-        "514": {
-          "json": {}
-        },
-        "515": {
-          "json": {}
-        },
         "516": {
           "json": {}
         },

@@ -7,9 +7,7 @@ export function main() {
 
     GltfContainer.create(backSign, {
         src: "assets/scene/backSign.glb"
-        // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
-        // visibleMeshesCollisionMask:
-        //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
+
     })
 
     Transform.create(backSign, {
@@ -21,31 +19,77 @@ export function main() {
 
     GltfContainer.create(sideSignA, {
         src: "assets/scene/sideSign.glb"
-        // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
-        // visibleMeshesCollisionMask:
-        //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
+
     })
 
     Transform.create(sideSignA, {
         position: Vector3.create(2.5, 0, 14),
-        scale: Vector3.create(1, 1, 1),
+        scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
     let sideSignB = engine.addEntity()
 
     GltfContainer.create(sideSignB, {
         src: "assets/scene/sideSign.glb"
-        // invisibleMeshesCollisionMask: ColliderLayer.CL_NONE,
-        // visibleMeshesCollisionMask:
-        //   ColliderLayer.CL_POINTER | ColliderLayer.CL_PHYSICS,
+
     })
 
     Transform.create(sideSignB, {
         position: Vector3.create(2.5, 0, 2),
-        scale: Vector3.create(1, 1, 1),
+        scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 0, 0)
     })
 
+    let sideSignHeaderA = engine.addEntity()
+
+    GltfContainer.create(sideSignHeaderA, {
+        src: "assets/scene/scoreBoardHeader.glb"
+
+    })
+
+    Transform.create(sideSignHeaderA, {
+        position: Vector3.create(2.5, 0, 14),
+        scale: Vector3.create(0.8, 0.8, 0.8),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    })
+    let sideSignHeaderB = engine.addEntity()
+
+    GltfContainer.create(sideSignHeaderB, {
+        src: "assets/scene/InstructionsHeader.glb"
+
+    })
+
+    Transform.create(sideSignHeaderB, {
+        position: Vector3.create(2.5, 0, 2),
+        scale: Vector3.create(0.8, 0.8, 0.8),
+        rotation: Quaternion.fromEulerDegrees(0, 0, 0)
+    })
+
+    let fence = engine.addEntity()
+
+    GltfContainer.create(fence, {
+        src: "assets/scene/fence.glb"
+
+    })
+
+    Transform.create(fence, {
+        position: Vector3.create(8, 0, 8),
+        scale: Vector3.create(1, 1, 1),
+        rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+    })
+
+    let floor = engine.addEntity()
+
+    GltfContainer.create(floor, {
+        src: "assets/scene/floor.glb"
+
+    })
+
+    Transform.create(floor, {
+        position: Vector3.create(8, 0, 8),
+        scale: Vector3.create(1, 1, 1),
+        rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+    })
 
 
     initGame()
