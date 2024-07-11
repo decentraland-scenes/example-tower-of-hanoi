@@ -303,7 +303,7 @@ function startLevel(levelN: number) {
 
   const playerData = Player.getMutable(playerEntity)
 
-  playerData.levelStartedAt = `${Date.now()}`
+  playerData.levelStartedAt = Date.now()
   playerData.currentLevel = levelN
   playerData.moves = 0
 

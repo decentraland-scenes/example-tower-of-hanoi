@@ -42,7 +42,7 @@ export function initStatusBoard() {
 
 function updateTexts() {
     const playerData = Player.get(playerEntity)
-    const gameElapsedTime = (Date.now() - parseInt(playerData.levelStartedAt)) / 1000
+    const gameElapsedTime = (Date.now() - playerData.levelStartedAt) / 1000
     const minutes = Math.floor(gameElapsedTime / 60)
     const seconds = Math.round(gameElapsedTime) - minutes * 60
 

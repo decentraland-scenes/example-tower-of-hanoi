@@ -10,9 +10,9 @@ const gameLoopFreq = 1 //times per second
 export const Player = engine.defineComponent('player', {
     id: Schemas.String,
     name: Schemas.String,
-    arrivedAt: Schemas.String,
+    arrivedAt: Schemas.Int64,
     moves: Schemas.Number,
-    levelStartedAt: Schemas.String,
+    levelStartedAt: Schemas.Int64,
     currentLevel: Schemas.Number
 })
 
@@ -78,7 +78,7 @@ export function setCurrentPlayer() {
     if (!localPlayer) return false
 
     if (networkPlayer.id === '') {
-        Player.createOrReplace(playerEntity, { id: localPlayer.userId, name: localPlayer.name, arrivedAt: `${Date.now()}` })
+        Player.createOrReplace(playerEntity, { id: localPlayer.userId, name: localPlayer.name, arrivedAt: Date.now() })
         return true
     }
 
@@ -91,7 +91,7 @@ export function checkTimer() {
 
     if (localPlayer.id !== '') {
         const now = Date.now()
-        if (now - parseInt(localPlayer.arrivedAt) >= sessionMaxTime * 1000) {
+        if (now - localPlayer.arrivedAt >= sessionMaxTime * 1000) {
             clearPlayerData()
             movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
         }
