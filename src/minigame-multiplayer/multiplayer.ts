@@ -22,7 +22,7 @@ export function initPlayerData() {
     playerEntity = engine.addEntity()
 
     Player.create(playerEntity, { id: '', name: '', currentLevel: -1 })
-    Player.onChange(playerEntity, (data) => console.log(data))
+    // Player.onChange(playerEntity, (data) => console.log(data))
     
     syncEntity(playerEntity, [Player.componentId], 3002)
 

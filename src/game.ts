@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 
@@ -12,6 +12,7 @@ import { uiAssets } from './minigame-ui/resources'
 let movesHistory: any = []
 const maxDiscs = 7
 const towerLocations = [-1, 11.75, 8, 4.25]
+let enableSounds = true
 
 export const Disc = engine.defineComponent('disc', {
   size: Schemas.Number,
@@ -29,7 +30,8 @@ export function initGame() {
     uiAssets.shapes.SQUARE_GREEN,
     uiAssets.numbers[1],
     "START LEVEL 1",
-    () => startLevel(4)
+    // () => startLevel(4)
+    () => startLevel(1)
   )
 
   const level2Button = new MenuButton({
@@ -63,6 +65,39 @@ export function initGame() {
     uiAssets.icons.undo,
     "UNDO LAST MOVE",
     () => undo()
+  )
+  
+  new MenuButton({
+    position: Vector3.create(14.9, 4.30, 5.2),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    uiAssets.shapes.SQUARE_RED,
+    uiAssets.icons.restart,
+    "RESTART LEVEL",
+    () => startLevel(Player.get(playerEntity).currentLevel)
+  )
+
+  new MenuButton({
+    position: Vector3.create(14.9, 5.7, 5.4),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    uiAssets.shapes.SQUARE_RED,
+    uiAssets.icons.sound,
+    'Sound FX',
+    () => enableSounds = !enableSounds
+  )
+  
+  new MenuButton({
+    position: Vector3.create(14.9, 5.7, 10.8),
+    scale: Vector3.create(2.4, 2.4, 2.4),
+    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+  },
+    uiAssets.shapes.RECT_RED,
+    uiAssets.icons.exitText,
+    'Exit from game area',
+    () => movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
   )
 
   //add click trigger for towers
@@ -123,6 +158,7 @@ export function initGame() {
   initDiscs()
   initPlayerData()
   initStatusBoard()
+  setupWinAnimations()
 
 }
 
@@ -177,23 +213,28 @@ function validateMove(tower: number) {
       const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 3)
 
       if (towerDiscs.length === discs.length) {
-        console.log("win")
+        // console.log("win")
+        AudioSource.createOrReplace(discs[0][0], {
+          audioClipUrl: "sounds/win.mp3",
+          playing: true,
+          volume: 2
+        })
+
+        playWinAnimations()
+
       }
     }
   }
 
 }
 
-function landDisc(entity: Entity, tower: number) {
+function landDisc(discEntity: Entity, tower: number) {
 
-  const discData = Disc.getMutable(entity)
-
+  const discData = Disc.getMutable(discEntity)
+  const discTransform = Transform.get(discEntity)
   const sameTower = discData.currentTower === tower
-
   discData.currentTower = tower
-
-  const discTransform = Transform.get(entity)
-
+  
   const towerEntities = [...engine.getEntitiesWith(Disc)].filter(([entity, disc]) => disc.currentTower === tower)
 
   const horizontalTween = {
@@ -215,20 +256,27 @@ function landDisc(entity: Entity, tower: number) {
   }
 
   const tweensSequence: PBTween[] = []
-  
+
   if (!sameTower) {
     tweensSequence.push(horizontalTween)
   }
-  
+
   tweensSequence.push(verticalTween)
 
-  Tween.createOrReplace(entity, tweensSequence.shift())
+  Tween.createOrReplace(discEntity, tweensSequence.shift())
 
   if (tweensSequence.length) {
-    TweenSequence.createOrReplace(entity, {
+    TweenSequence.createOrReplace(discEntity, {
       sequence: [
         ...tweensSequence
       ]
+    })
+  }
+
+  if (enableSounds) {
+    AudioSource.createOrReplace(discEntity, {
+      audioClipUrl: 'sounds/place.mp3',
+      playing: true,
     })
   }
 }
@@ -278,9 +326,15 @@ function elevateDisc(discEntity: Entity) {
       end: { ...selectedTransform.position, y: 3 }
     }),
     duration: 300,
-    //go up
     easingFunction: EasingFunction.EF_EASEOUTQUAD,
   })
+
+  if (enableSounds) {
+    AudioSource.createOrReplace(discEntity, {
+      audioClipUrl: 'sounds/select.mp3',
+      playing: true,
+    })
+  }
 }
 
 function initDiscs() {
@@ -336,4 +390,119 @@ function startLevel(levelN: number) {
   }
 }
 
+function setupWinAnimations () {
+  let winAnimA = engine.addEntity()
+  let winAnimB = engine.addEntity()
+  let winAnimC = engine.addEntity()
+  let winAnimFollow = engine.addEntity()
+  let winAnimText = engine.addEntity()
 
+  GltfContainer.create(winAnimA, {
+      src: "assets/scene/winAnim.glb",
+
+  })
+
+  Transform.create(winAnimA, {
+      position: Vector3.create(14, 0.2, 2),
+      scale: Vector3.create(1, 1, 1),
+      rotation: Quaternion.fromEulerDegrees(0,45, 0)
+  })
+
+  Animator.create(winAnimA, {
+    states: [
+      {clip: 'armature_psAction',
+        playing: false,
+        loop: false
+      }
+    ]
+  })
+
+  GltfContainer.create(winAnimB, {
+      src: "assets/scene/winAnim.glb"
+
+  })
+
+  Transform.create(winAnimB, {
+      position: Vector3.create(14, 0.2, 8),
+      scale: Vector3.create(1, 1, 1),
+      rotation: Quaternion.fromEulerDegrees(0,0, 0)
+  })
+
+  Animator.create(winAnimB, {
+    states: [
+      {clip: 'armature_psAction',
+        playing: false,
+        loop: false
+      }
+    ]
+  })
+
+
+  GltfContainer.create(winAnimC, {
+      src: "assets/scene/winAnim.glb"
+  })
+
+  Transform.create(winAnimC, {
+      position: Vector3.create(14, 0.2, 14),
+      scale: Vector3.create(1, 1, 1),
+      rotation: Quaternion.fromEulerDegrees(0,-45, 0)
+  })
+  
+  Animator.create(winAnimC, {
+    states: [
+      {clip: 'armature_psAction',
+        playing: false,
+        loop: false
+      }
+    ]
+  })
+  
+
+  GltfContainer.create(winAnimFollow, {
+      src: "assets/scene/winAnimFollow.glb"
+  })
+
+  Transform.create(winAnimFollow, {
+      position: Vector3.create(10, 2, 8),
+      scale: Vector3.create(0.3, 0.3, 0.3),
+      rotation: Quaternion.fromEulerDegrees(0,-90, 0)
+  })
+  Billboard.create(winAnimFollow, {})
+
+  Animator.create(winAnimFollow, {
+    states: [
+      {clip: 'RaysAnim',
+        playing: false,
+        loop: false
+      }
+    ]
+  })
+  
+
+  GltfContainer.create(winAnimText, {
+      src: "assets/scene/winAnimText.glb"
+  })
+
+  Animator.create(winAnimText, {
+    states: [
+      {clip: 'Animation',
+        playing: false,
+        loop: false
+      }
+    ]
+  })
+
+  Transform.create(winAnimText, {
+      position: Vector3.create(10, 2, 8),
+      scale: Vector3.create(0.8, 0.8, 0.8),
+      rotation: Quaternion.fromEulerDegrees(0,-90, 0)
+  })
+  Billboard.create(winAnimText, {})
+}
+
+function playWinAnimations () {
+  const animations = engine.getEntitiesWith(Animator)
+  for (const [entity, animator] of animations) {
+    Animator.getMutable(entity).states[0].playing = true
+  }
+}
