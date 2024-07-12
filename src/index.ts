@@ -25,7 +25,7 @@ export function main() {
     })
 
     Transform.create(sideSignA, {
-        position: Vector3.create(2.5, 0, 14),
+        position: Vector3.create(2, 0, 15.4),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
@@ -37,7 +37,7 @@ export function main() {
     })
 
     Transform.create(sideSignB, {
-        position: Vector3.create(2.5, 0, 2),
+        position: Vector3.create(2, 0, 0.6),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 0, 0)
     })
@@ -50,7 +50,7 @@ export function main() {
     })
 
     Transform.create(sideSignHeaderA, {
-        position: Vector3.create(2.5, 0, 14),
+        position: Vector3.create(2, 0, 15.4),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
@@ -62,7 +62,7 @@ export function main() {
     })
 
     Transform.create(sideSignHeaderB, {
-        position: Vector3.create(2.5, 0, 2),
+        position: Vector3.create(2, 0, 0.6),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 0, 0)
     })
