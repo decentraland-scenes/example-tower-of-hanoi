@@ -1,11 +1,11 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { Animator, AudioSource, Billboard, CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 
 import { movePlayerTo } from '~system/RestrictedActions'
 import { MenuButton } from './minigame-ui/button'
-import { playerEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, Player } from './minigame-multiplayer/multiplayer'
+import { multiPlayerEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, MultiPlayer } from './minigame-multiplayer/multiplayer'
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 
@@ -75,7 +75,7 @@ export function initGame() {
     uiAssets.shapes.SQUARE_RED,
     uiAssets.icons.restart,
     "RESTART LEVEL",
-    () => startLevel(Player.get(playerEntity).currentLevel)
+    () => startLevel(MultiPlayer.get(multiPlayerEntity).currentLevel)
   )
 
   new MenuButton({
@@ -121,20 +121,20 @@ export function initGame() {
   }
 
   //create collider box
-  const gameAreaCollider = engine.addEntity()
+  // const gameAreaCollider = engine.addEntity()
 
-  Transform.create(gameAreaCollider, {
-    position: Vector3.create(9.5, 0, 8),
-    scale: Vector3.create(9.75, 16, 12.5)
-  })
+  // Transform.create(gameAreaCollider, {
+  //   position: Vector3.create(9.5, 0, 8),
+  //   scale: Vector3.create(9.75, 16, 12.5)
+  // })
 
-  // MeshRenderer.setBox(triggerAreaEntity)
-  MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
+  // // MeshRenderer.setBox(triggerAreaEntity)
+  // MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
 
-  CameraModeArea.create(gameAreaCollider, {
-    area: Vector3.create(9.65, 10, 12.4),
-    mode: CameraType.CT_FIRST_PERSON
-  })
+  // CameraModeArea.create(gameAreaCollider, {
+  //   area: Vector3.create(9.65, 10, 12.4),
+  //   mode: CameraType.CT_FIRST_PERSON
+  // })
 
 
   // start game button
@@ -148,10 +148,10 @@ export function initGame() {
     uiAssets.icons.playText,
     "PLAY GAME",
     () => {
-      if (setCurrentPlayer()) {
-        movePlayerTo({ newRelativePosition: Vector3.create(6, 2, 8), cameraTarget: Vector3.create(7, 2, 9) })
-        startLevel(4)
-      }
+      // if (setCurrentPlayer()) {
+      //   startGame()
+      // }
+      setCurrentPlayer()
     }
   )
 
@@ -162,10 +162,15 @@ export function initGame() {
 
 }
 
+export function startGame () {
+  movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
+  startLevel(4)
+}
+
 function undo() {
   const [entity, disc] = movesHistory.pop()
   landDisc(entity, disc.currentTower)
-  Player.getMutable(playerEntity).moves = movesHistory.length
+  MultiPlayer.getMutable(multiPlayerEntity).moves = movesHistory.length
 }
 
 function onTowerClick(towerNumber: number) {
@@ -201,7 +206,7 @@ function validateMove(tower: number) {
   //move is valid
   if (selected[1].size < towerMinSize) {
     movesHistory.push(selected)
-    Player.getMutable(playerEntity).moves = movesHistory.length
+    MultiPlayer.getMutable(multiPlayerEntity).moves = movesHistory.length
 
     landDisc(selected[0], tower)
 
@@ -365,7 +370,7 @@ function startLevel(levelN: number) {
 
   clearSelection()
 
-  const playerData = Player.getMutable(playerEntity)
+  const playerData = MultiPlayer.getMutable(multiPlayerEntity)
 
   playerData.levelStartedAt = Date.now()
   playerData.currentLevel = levelN
@@ -416,6 +421,8 @@ function setupWinAnimations () {
       }
     ]
   })
+
+  
 
   GltfContainer.create(winAnimB, {
       src: "assets/scene/winAnim.glb"
@@ -498,11 +505,32 @@ function setupWinAnimations () {
       rotation: Quaternion.fromEulerDegrees(0,-90, 0)
   })
   Billboard.create(winAnimText, {})
+
+  VisibilityComponent.create(winAnimA, {visible: false})
+  VisibilityComponent.create(winAnimB, {visible: false})
+  VisibilityComponent.create(winAnimC, {visible: false})
+  VisibilityComponent.create(winAnimFollow, {visible: false})
+  VisibilityComponent.create(winAnimText, {visible: false})
 }
 
+let winAnimsTime = 0
 function playWinAnimations () {
-  const animations = engine.getEntitiesWith(Animator)
+  const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
   for (const [entity, animator] of animations) {
+    VisibilityComponent.getMutable(entity).visible = true
     Animator.getMutable(entity).states[0].playing = true
   }
+  
+  engine.addSystem((dt) => {
+    winAnimsTime += dt
+    if (winAnimsTime >= 8) {
+      winAnimsTime = 0
+      const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
+      for (const [entity, animator, vis] of animations) {
+        VisibilityComponent.getMutable(entity).visible = false
+      }
+      engine.removeSystem('anims-hide')
+      
+    }
+  }, undefined, 'anims-hide')
 }
