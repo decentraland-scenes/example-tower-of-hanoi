@@ -95,11 +95,11 @@ export function main() {
 
    
 
-    // AudioSource.create(engine.CameraEntity, {
-    //     audioClipUrl: 'sounds/ambientMusic.mp3',
-    //     playing: true,
-    //     volume: 0.5
-    // })
+    AudioSource.create(engine.CameraEntity, {
+        audioClipUrl: 'sounds/ambientMusic.mp3',
+        playing: true,
+        volume: 0.5
+    })
 
     new MenuButton({
             position: Vector3.create(14.9, 5.7, 4.7),
