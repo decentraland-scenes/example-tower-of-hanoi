@@ -1,18 +1,23 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { Animator, AudioSource, Billboard, CameraModeArea, CameraType, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 
 import { movePlayerTo } from '~system/RestrictedActions'
 import { MenuButton } from './minigame-ui/button'
-import { multiPlayerEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, MultiPlayer } from './minigame-multiplayer/multiplayer'
+import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, GameData } from './minigame-multiplayer/multiplayer'
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
+import { upsertProgress } from './minigame-server/server'
 
 let movesHistory: any = []
 const maxDiscs = 7
 const towerLocations = [-1, 11.75, 8, 4.25]
 let enableSounds = true
+
+const sounds = engine.addEntity()
+
+Transform.create(sounds, {parent: engine.CameraEntity})
 
 export const Disc = engine.defineComponent('disc', {
   size: Schemas.Number,
@@ -75,7 +80,7 @@ export function initGame() {
     uiAssets.shapes.SQUARE_RED,
     uiAssets.icons.restart,
     "RESTART LEVEL",
-    () => startLevel(MultiPlayer.get(multiPlayerEntity).currentLevel)
+    () => startLevel(GameData.get(gameDataEntity).currentLevel)
   )
 
   new MenuButton({
@@ -120,23 +125,6 @@ export function initGame() {
     )
   }
 
-  //create collider box
-  // const gameAreaCollider = engine.addEntity()
-
-  // Transform.create(gameAreaCollider, {
-  //   position: Vector3.create(9.5, 0, 8),
-  //   scale: Vector3.create(9.75, 16, 12.5)
-  // })
-
-  // // MeshRenderer.setBox(triggerAreaEntity)
-  // MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
-
-  // CameraModeArea.create(gameAreaCollider, {
-  //   area: Vector3.create(9.65, 10, 12.4),
-  //   mode: CameraType.CT_FIRST_PERSON
-  // })
-
-
   // start game button
   new MenuButton(
     {
@@ -170,7 +158,7 @@ export function startGame () {
 function undo() {
   const [entity, disc] = movesHistory.pop()
   landDisc(entity, disc.currentTower)
-  MultiPlayer.getMutable(multiPlayerEntity).moves = movesHistory.length
+  GameData.getMutable(gameDataEntity).moves = movesHistory.length
 }
 
 function onTowerClick(towerNumber: number) {
@@ -206,7 +194,7 @@ function validateMove(tower: number) {
   //move is valid
   if (selected[1].size < towerMinSize) {
     movesHistory.push(selected)
-    MultiPlayer.getMutable(multiPlayerEntity).moves = movesHistory.length
+    GameData.getMutable(gameDataEntity).moves = movesHistory.length
 
     landDisc(selected[0], tower)
 
@@ -218,19 +206,27 @@ function validateMove(tower: number) {
       const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 3)
 
       if (towerDiscs.length === discs.length) {
-        // console.log("win")
-        AudioSource.createOrReplace(discs[0][0], {
-          audioClipUrl: "sounds/win.mp3",
-          playing: true,
-          volume: 2
-        })
-
-        playWinAnimations()
-
+        
+        onWinLevel()
       }
     }
   }
 
+}
+
+function onWinLevel() {
+// console.log("win")
+GameData.getMutable(gameDataEntity).levelFinishedAt = Date.now()
+
+AudioSource.createOrReplace(sounds, {
+  audioClipUrl: "sounds/win.mp3",
+  playing: enableSounds,
+  volume: 2
+})
+
+upsertProgress()
+
+playWinAnimations()
 }
 
 function landDisc(discEntity: Entity, tower: number) {
@@ -278,12 +274,10 @@ function landDisc(discEntity: Entity, tower: number) {
     })
   }
 
-  if (enableSounds) {
-    AudioSource.createOrReplace(discEntity, {
+    AudioSource.createOrReplace(sounds, {
       audioClipUrl: 'sounds/place.mp3',
-      playing: true,
+      playing: enableSounds,
     })
-  }
 }
 
 function getLandingHeight(towerDiscsCount: number) {
@@ -334,12 +328,11 @@ function elevateDisc(discEntity: Entity) {
     easingFunction: EasingFunction.EF_EASEOUTQUAD,
   })
 
-  if (enableSounds) {
-    AudioSource.createOrReplace(discEntity, {
+  
+    AudioSource.createOrReplace(sounds, {
       audioClipUrl: 'sounds/select.mp3',
-      playing: true,
+      playing: enableSounds,
     })
-  }
 }
 
 function initDiscs() {
@@ -370,9 +363,10 @@ function startLevel(levelN: number) {
 
   clearSelection()
 
-  const playerData = MultiPlayer.getMutable(multiPlayerEntity)
+  const playerData = GameData.getMutable(gameDataEntity)
 
   playerData.levelStartedAt = Date.now()
+  playerData.levelFinishedAt = 0
   playerData.currentLevel = levelN
   playerData.moves = 0
 
@@ -529,8 +523,11 @@ function playWinAnimations () {
       for (const [entity, animator, vis] of animations) {
         VisibilityComponent.getMutable(entity).visible = false
       }
+
+      if (GameData.get(gameDataEntity).currentLevel < 3) {
+        startLevel(GameData.get(gameDataEntity).currentLevel + 1)
+      }
       engine.removeSystem('anims-hide')
-      
     }
   }, undefined, 'anims-hide')
 }

@@ -1,5 +1,5 @@
 import { engine, Entity, TextAlignMode, TextShape, Transform } from "@dcl/sdk/ecs"
-import { MultiPlayer, multiPlayerEntity } from "./minigame-multiplayer/multiplayer"
+import { GameData, gameDataEntity } from "./minigame-multiplayer/multiplayer"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
 
 let movesEntity: Entity
@@ -41,18 +41,18 @@ export function initStatusBoard() {
 }
 
 function updateTexts() {
-    const playerData = MultiPlayer.get(multiPlayerEntity)
-    const gameElapsedTime = (Date.now() - playerData.levelStartedAt) / 1000
+    const gameData = GameData.get(gameDataEntity)
+    const gameElapsedTime = ((gameData.levelFinishedAt || Date.now()) - gameData.levelStartedAt) / 1000
     const minutes = Math.floor(gameElapsedTime / 60)
     const seconds = Math.round(gameElapsedTime) - minutes * 60
 
     TextShape.createOrReplace(playerNameEntity, {
-        text: `${playerData.name}`,
+        text: `${gameData.playerName}`,
         fontSize: 3,
         textAlign: TextAlignMode.TAM_TOP_LEFT
     })
 
-    if (playerData.currentLevel > 0) {
+    if (gameData.currentLevel > 0) {
         TextShape.createOrReplace(timeEntity, {
             text: `${minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}:${seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}`,
             fontSize: 3
@@ -66,7 +66,7 @@ function updateTexts() {
     }
 
     TextShape.createOrReplace(movesEntity, {
-        text: `${playerData.moves}`,
+        text: `${gameData.moves}`,
         fontSize: 3
     })
 }
