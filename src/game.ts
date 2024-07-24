@@ -128,9 +128,9 @@ export function initGame() {
   // start game button
   new MenuButton(
     {
-      position: Vector3.create(4.35, 1, 8),
+      position: Vector3.create(4.26, 1.03, 8),
       rotation: Quaternion.fromEulerDegrees(-45, 90, 0),
-      scale: Vector3.create(1, 1, 1)
+      scale: Vector3.create(1.2, 1.2, 1.2)
     },
     uiAssets.shapes.RECT_GREEN,
     uiAssets.icons.playText,

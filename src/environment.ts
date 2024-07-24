@@ -92,6 +92,20 @@ export function initEnvironment() {
         rotation: Quaternion.fromEulerDegrees(0, -90, 0)
     })
 
+    let workstationDisplay = engine.addEntity()
+
+    GltfContainer.create(workstationDisplay, {
+        src: "assets/scene/workstation_display.glb"
+
+    })
+
+    Transform.create(workstationDisplay, {
+        position: Vector3.create(4.52, 1.47, 8),
+        scale: Vector3.create(1, 1, 1),
+        rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+    })
+
+
    
     let music = engine.addEntity()
 
