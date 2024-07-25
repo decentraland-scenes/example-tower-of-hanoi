@@ -9,6 +9,7 @@ import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, G
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
+import { QueueDisplay } from './minigame-ui/queueDisplay'
 
 let movesHistory: any = []
 const maxDiscs = 7
@@ -17,7 +18,7 @@ let enableSounds = true
 
 const sounds = engine.addEntity()
 
-Transform.create(sounds, {parent: engine.CameraEntity})
+Transform.create(sounds, { parent: engine.CameraEntity })
 
 export const Disc = engine.defineComponent('disc', {
   size: Schemas.Number,
@@ -71,7 +72,7 @@ export function initGame() {
     "UNDO LAST MOVE",
     () => undo()
   )
-  
+
   new MenuButton({
     position: Vector3.create(14.9, 4.30, 5.2),
     scale: Vector3.create(2.4, 2.4, 2.4),
@@ -93,7 +94,7 @@ export function initGame() {
     'Sound FX',
     () => enableSounds = !enableSounds
   )
-  
+
   new MenuButton({
     position: Vector3.create(14.9, 5.7, 10.8),
     scale: Vector3.create(2.4, 2.4, 2.4),
@@ -143,6 +144,13 @@ export function initGame() {
     }
   )
 
+  const queueDisplay = new QueueDisplay({
+    position: Vector3.create(4.52, 1.47, 8),
+    rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+  },
+  true  
+)
+
   initDiscs()
   initPlayerData()
   initStatusBoard()
@@ -150,7 +158,7 @@ export function initGame() {
 
 }
 
-export function startGame () {
+export function startGame() {
   movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
   startLevel(4)
 }
@@ -206,7 +214,7 @@ function validateMove(tower: number) {
       const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 3)
 
       if (towerDiscs.length === discs.length) {
-        
+
         onWinLevel()
       }
     }
@@ -215,18 +223,18 @@ function validateMove(tower: number) {
 }
 
 function onWinLevel() {
-// console.log("win")
-GameData.getMutable(gameDataEntity).levelFinishedAt = Date.now()
+  // console.log("win")
+  GameData.getMutable(gameDataEntity).levelFinishedAt = Date.now()
 
-AudioSource.createOrReplace(sounds, {
-  audioClipUrl: "sounds/win.mp3",
-  playing: enableSounds,
-  volume: 2
-})
+  AudioSource.createOrReplace(sounds, {
+    audioClipUrl: "sounds/win.mp3",
+    playing: enableSounds,
+    volume: 2
+  })
 
-upsertProgress()
+  upsertProgress()
 
-playWinAnimations()
+  playWinAnimations()
 }
 
 function landDisc(discEntity: Entity, tower: number) {
@@ -235,7 +243,7 @@ function landDisc(discEntity: Entity, tower: number) {
   const discTransform = Transform.get(discEntity)
   const sameTower = discData.currentTower === tower
   discData.currentTower = tower
-  
+
   const towerEntities = [...engine.getEntitiesWith(Disc)].filter(([entity, disc]) => disc.currentTower === tower)
 
   const horizontalTween = {
@@ -274,10 +282,10 @@ function landDisc(discEntity: Entity, tower: number) {
     })
   }
 
-    AudioSource.createOrReplace(sounds, {
-      audioClipUrl: 'sounds/place.mp3',
-      playing: enableSounds,
-    })
+  AudioSource.createOrReplace(sounds, {
+    audioClipUrl: 'sounds/place.mp3',
+    playing: enableSounds,
+  })
 }
 
 function getLandingHeight(towerDiscsCount: number) {
@@ -328,11 +336,11 @@ function elevateDisc(discEntity: Entity) {
     easingFunction: EasingFunction.EF_EASEOUTQUAD,
   })
 
-  
-    AudioSource.createOrReplace(sounds, {
-      audioClipUrl: 'sounds/select.mp3',
-      playing: enableSounds,
-    })
+
+  AudioSource.createOrReplace(sounds, {
+    audioClipUrl: 'sounds/select.mp3',
+    playing: enableSounds,
+  })
 }
 
 function initDiscs() {
@@ -389,7 +397,7 @@ function startLevel(levelN: number) {
   }
 }
 
-function setupWinAnimations () {
+function setupWinAnimations() {
   let winAnimA = engine.addEntity()
   let winAnimB = engine.addEntity()
   let winAnimC = engine.addEntity()
@@ -397,41 +405,43 @@ function setupWinAnimations () {
   let winAnimText = engine.addEntity()
 
   GltfContainer.create(winAnimA, {
-      src: "assets/scene/winAnim.glb",
+    src: "assets/scene/winAnim.glb",
 
   })
 
   Transform.create(winAnimA, {
-      position: Vector3.create(14, 0.2, 2),
-      scale: Vector3.create(1, 1, 1),
-      rotation: Quaternion.fromEulerDegrees(0,45, 0)
+    position: Vector3.create(14, 0.2, 2),
+    scale: Vector3.create(1, 1, 1),
+    rotation: Quaternion.fromEulerDegrees(0, 45, 0)
   })
 
   Animator.create(winAnimA, {
     states: [
-      {clip: 'armature_psAction',
+      {
+        clip: 'armature_psAction',
         playing: false,
         loop: false
       }
     ]
   })
 
-  
+
 
   GltfContainer.create(winAnimB, {
-      src: "assets/scene/winAnim.glb"
+    src: "assets/scene/winAnim.glb"
 
   })
 
   Transform.create(winAnimB, {
-      position: Vector3.create(14, 0.2, 8),
-      scale: Vector3.create(1, 1, 1),
-      rotation: Quaternion.fromEulerDegrees(0,0, 0)
+    position: Vector3.create(14, 0.2, 8),
+    scale: Vector3.create(1, 1, 1),
+    rotation: Quaternion.fromEulerDegrees(0, 0, 0)
   })
 
   Animator.create(winAnimB, {
     states: [
-      {clip: 'armature_psAction',
+      {
+        clip: 'armature_psAction',
         playing: false,
         loop: false
       }
@@ -440,53 +450,56 @@ function setupWinAnimations () {
 
 
   GltfContainer.create(winAnimC, {
-      src: "assets/scene/winAnim.glb"
+    src: "assets/scene/winAnim.glb"
   })
 
   Transform.create(winAnimC, {
-      position: Vector3.create(14, 0.2, 14),
-      scale: Vector3.create(1, 1, 1),
-      rotation: Quaternion.fromEulerDegrees(0,-45, 0)
+    position: Vector3.create(14, 0.2, 14),
+    scale: Vector3.create(1, 1, 1),
+    rotation: Quaternion.fromEulerDegrees(0, -45, 0)
   })
-  
+
   Animator.create(winAnimC, {
     states: [
-      {clip: 'armature_psAction',
+      {
+        clip: 'armature_psAction',
         playing: false,
         loop: false
       }
     ]
   })
-  
+
 
   GltfContainer.create(winAnimFollow, {
-      src: "assets/scene/winAnimFollow.glb"
+    src: "assets/scene/winAnimFollow.glb"
   })
 
   Transform.create(winAnimFollow, {
-      position: Vector3.create(10, 2, 8),
-      scale: Vector3.create(0.3, 0.3, 0.3),
-      rotation: Quaternion.fromEulerDegrees(0,-90, 0)
+    position: Vector3.create(10, 2, 8),
+    scale: Vector3.create(0.3, 0.3, 0.3),
+    rotation: Quaternion.fromEulerDegrees(0, -90, 0)
   })
   Billboard.create(winAnimFollow, {})
 
   Animator.create(winAnimFollow, {
     states: [
-      {clip: 'RaysAnim',
+      {
+        clip: 'RaysAnim',
         playing: false,
         loop: false
       }
     ]
   })
-  
+
 
   GltfContainer.create(winAnimText, {
-      src: "assets/scene/winAnimText.glb"
+    src: "assets/scene/winAnimText.glb"
   })
 
   Animator.create(winAnimText, {
     states: [
-      {clip: 'Animation',
+      {
+        clip: 'Animation',
         playing: false,
         loop: false
       }
@@ -494,27 +507,27 @@ function setupWinAnimations () {
   })
 
   Transform.create(winAnimText, {
-      position: Vector3.create(10, 2, 8),
-      scale: Vector3.create(0.8, 0.8, 0.8),
-      rotation: Quaternion.fromEulerDegrees(0,-90, 0)
+    position: Vector3.create(10, 2, 8),
+    scale: Vector3.create(0.8, 0.8, 0.8),
+    rotation: Quaternion.fromEulerDegrees(0, -90, 0)
   })
   Billboard.create(winAnimText, {})
 
-  VisibilityComponent.create(winAnimA, {visible: false})
-  VisibilityComponent.create(winAnimB, {visible: false})
-  VisibilityComponent.create(winAnimC, {visible: false})
-  VisibilityComponent.create(winAnimFollow, {visible: false})
-  VisibilityComponent.create(winAnimText, {visible: false})
+  VisibilityComponent.create(winAnimA, { visible: false })
+  VisibilityComponent.create(winAnimB, { visible: false })
+  VisibilityComponent.create(winAnimC, { visible: false })
+  VisibilityComponent.create(winAnimFollow, { visible: false })
+  VisibilityComponent.create(winAnimText, { visible: false })
 }
 
 let winAnimsTime = 0
-function playWinAnimations () {
+function playWinAnimations() {
   const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
   for (const [entity, animator] of animations) {
     VisibilityComponent.getMutable(entity).visible = true
     Animator.getMutable(entity).states[0].playing = true
   }
-  
+
   engine.addSystem((dt) => {
     winAnimsTime += dt
     if (winAnimsTime >= 8) {
