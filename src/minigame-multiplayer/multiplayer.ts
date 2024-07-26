@@ -1,9 +1,10 @@
 import { syncEntity } from "@dcl/sdk/network"
-import { CameraModeArea, CameraType, ColliderLayer, engine, Entity, MeshCollider, PlayerIdentityData, Schemas, Transform } from "@dcl/sdk/ecs"
+import { ColliderLayer, engine, Entity, MeshCollider, PlayerIdentityData, Schemas, Transform } from "@dcl/sdk/ecs"
 import { getPlayer } from "@dcl/sdk/src/players"
 import { movePlayerTo } from "~system/RestrictedActions"
-import { Vector3 } from "@dcl/sdk/math"
+import { Quaternion, Vector3 } from "@dcl/sdk/math"
 import { startGame } from "../game"
+import { QueueDisplay, SCREENS } from "../minigame-ui/queueDisplay"
 
 const sessionMaxTime = 300 //in seconds
 const gameLoopTime = 1 //times in seconds
@@ -26,6 +27,14 @@ export const GameData = engine.defineComponent('game-data', {
 })
 
 export let gameDataEntity: Entity
+
+let queueDisplay: QueueDisplay
+// let queueDisplay: QueueDisplay = new QueueDisplay({
+//     position: Vector3.create(4.52, 1.47, 8),
+//     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+// },
+//     false
+// )
 
 export function initPlayerData() {
 
@@ -50,12 +59,20 @@ export function initPlayerData() {
         position: Vector3.create(9.5, 0, 8),
         scale: Vector3.create(9.75, 16, 12.5)
     })
+
+    
+    queueDisplay = new QueueDisplay({
+        position: Vector3.create(4.52, 1.47, 8),
+        rotation: Quaternion.fromEulerDegrees(0, -90, 0),
+        scale: Vector3.create(1, 1, 1)
+    })
     setCollider()
 }
 
 export function checkPlayerIsAlive() {
     const gameData = GameData.get(gameDataEntity)
     const localPlayer = getPlayer()
+    // console.log('cheking player alive')
 
     if (gameData.playerAddress == '') return setCollider()
 
@@ -66,21 +83,49 @@ export function checkPlayerIsAlive() {
             transform.position.x >= 5.15 && transform.position.x <= 13.77 &&
             transform.position.z >= 2.23 && transform.position.z <= 13.77
     })
-
     if (!playerInGameArea) {
         if (Date.now() > gameData.playerArrivedAt + 3000) {
-            //player has been playing 3 sec and left
+            console.log('player left')
+            //player left
             setCollider()
             switchToNextPlayer()
         } else {
             if (localPlayer?.userId === gameData.playerAddress) {
-                //player just arrived
-                console.log('player just arrived')
-                setCurrentPlayer()
-                startGame()
+                //this player will start
+                getReadyToStart()
             }
         }
     }
+}
+
+let enterCountdown = false
+
+function getReadyToStart () {
+    queueDisplay.setScreen(SCREENS.playNext)
+    setCurrentPlayer()
+    
+    if (enterCountdown) return
+    enterCountdown = true
+    delayedFunction(2, () => {
+        console.log("startGame")
+        startGame()
+        queueDisplay.disable()
+        delayedFunction(1, () => enterCountdown = false)
+    })
+}
+
+
+function delayedFunction(time: number, cb: () => void) {
+    let timer = 0
+    const name = `timer-${Math.random()}`
+    engine.addSystem(dt => {
+        timer += dt
+        if (timer >= time) {
+            cb()
+            timer = 0
+            engine.removeSystem(name)
+        }
+    }, undefined, name)
 }
 
 function switchToNextPlayer() {
@@ -104,8 +149,9 @@ function switchToNextPlayer() {
             const localPlayer = getPlayer()
 
             if (localPlayer?.userId === newPlayer.address) {
-                setCurrentPlayer()
-                startGame()
+                // setCurrentPlayer()
+                // startGame()
+                getReadyToStart()
             }
         } else {
             switchToNextPlayer()
@@ -129,6 +175,8 @@ export function checkCurrentPlayer() {
 }
 
 export function setCurrentPlayer() {
+    queueDisplay.enable()
+
     const localPlayer = getPlayer()
     const multiPlayer = GameData.getMutable(gameDataEntity)
 
@@ -139,6 +187,7 @@ export function setCurrentPlayer() {
         multiPlayer.moves = 0
 
         MeshCollider.deleteFrom(gameAreaCollider)
+
         return true
     }
     addToQueue()
@@ -151,6 +200,8 @@ function addToQueue() {
 
     if (localPlayer && !gameData.queue.find(player => player.address === localPlayer?.userId)) {
         GameData.getMutable(gameDataEntity).queue.push({ address: localPlayer.userId, name: localPlayer.name })
+        queueDisplay.setScreen(SCREENS.addToQueue)
+        delayedFunction(2, () => queueDisplay.setScreen(SCREENS.queueList))
     }
 }
 
@@ -174,4 +225,5 @@ export function checkSessionTimer() {
 
 function setCollider() {
     MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER)
+    // queueDisplay.disable()
 }

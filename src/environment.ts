@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { AudioSource, GltfContainer, Transform, engine } from '@dcl/sdk/ecs'
+import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine } from '@dcl/sdk/ecs'
 import { MenuButton } from "./minigame-ui/button";
 import { uiAssets } from "./minigame-ui/resources";
 
@@ -93,7 +93,7 @@ export function initEnvironment() {
 
     let music = engine.addEntity()
 
-    Transform.create(music, {parent: engine.CameraEntity})
+    Transform.create(music, { parent: engine.CameraEntity })
 
     AudioSource.create(music, {
         audioClipUrl: 'sounds/ambientMusic.mp3',
@@ -101,11 +101,25 @@ export function initEnvironment() {
         volume: 0.5
     })
 
+    const disablePassportsEntity = engine.addEntity()
+    console.log("creating disable passports")
+
+    AvatarModifierArea.create(disablePassportsEntity, {
+        area: Vector3.create(4, 0, 4),
+        modifiers: [AvatarModifierType.AMT_DISABLE_PASSPORTS, AvatarModifierType.AMT_HIDE_AVATARS],
+        excludeIds: []
+    })
+
+    Transform.create(disablePassportsEntity, {
+        position: Vector3.create(8, 4, 8),
+        scale: Vector3.create(4,4,4)
+    })
+
     new MenuButton({
-            position: Vector3.create(14.9, 5.7, 4.7),
-            scale: Vector3.create(2.4, 2.4, 2.4),
-            rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
-        },
+        position: Vector3.create(14.9, 5.7, 4.7),
+        scale: Vector3.create(2.4, 2.4, 2.4),
+        rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    },
         uiAssets.shapes.SQUARE_RED,
         uiAssets.icons.music,
         'Play/Stop Music',

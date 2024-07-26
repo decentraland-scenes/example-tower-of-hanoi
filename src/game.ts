@@ -9,7 +9,6 @@ import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, G
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
-import { QueueDisplay } from './minigame-ui/queueDisplay'
 
 let movesHistory: any = []
 const maxDiscs = 7
@@ -126,6 +125,8 @@ export function initGame() {
     )
   }
 
+  
+
   // start game button
   new MenuButton(
     {
@@ -144,12 +145,6 @@ export function initGame() {
     }
   )
 
-  const queueDisplay = new QueueDisplay({
-    position: Vector3.create(4.52, 1.47, 8),
-    rotation: Quaternion.fromEulerDegrees(0, -90, 0)
-  },
-  true  
-)
 
   initDiscs()
   initPlayerData()
@@ -160,6 +155,7 @@ export function initGame() {
 
 export function startGame() {
   movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
+  //TODO: add delayed function and countdown
   startLevel(4)
 }
 
