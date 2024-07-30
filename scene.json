@@ -2,8 +2,8 @@
   "ecs7": true,
   "runtimeVersion": "7",
   "display": {
-    "title": "Tower of Hanoi",
-    "description": "Tower of Hanoi",
+    "title": "Towers of Hanoi",
+    "description": "Classic Towers of Hanoi game",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"
   },
