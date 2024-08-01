@@ -2,8 +2,8 @@
   "ecs7": true,
   "runtimeVersion": "7",
   "display": {
-    "title": "Towers of Hanoi",
-    "description": "Classic Towers of Hanoi game",
+    "title": "Tower of Hanoi",
+    "description": "Classic Tower of Hanoi game",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"
   },
@@ -50,7 +50,7 @@
     "portableExperiences": "enabled"
   },
   "worldConfiguration": {
-    "name": "pejo.dcl.eth"
+    "name": "towerofhanoi.dcl.eth"
   },
   "rating": "T"
 }

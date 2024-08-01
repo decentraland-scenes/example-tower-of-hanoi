@@ -122,7 +122,7 @@ export function initEnvironment() {
 
     AvatarModifierArea.create(disablePassportsEntity, {
         area: Vector3.create(4, 0, 4),
-        modifiers: [AvatarModifierType.AMT_DISABLE_PASSPORTS, AvatarModifierType.AMT_HIDE_AVATARS],
+        modifiers: [AvatarModifierType.AMT_DISABLE_PASSPORTS],
         excludeIds: []
     })
 

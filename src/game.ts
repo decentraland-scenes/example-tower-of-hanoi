@@ -2,10 +2,13 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
+import playersApi, { getPlayer } from '@dcl/sdk/players'
+import * as playersQueue from "@dcl-sdk/players-queue/src"
+import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
 import { MenuButton } from './minigame-ui/button'
-import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, GameData } from './minigame-multiplayer/multiplayer'
+// import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, GameData } from './minigame-multiplayer/multiplayer'
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
@@ -14,6 +17,17 @@ let movesHistory: any = []
 const maxDiscs = 7
 const towerLocations = [-1, 11.75, 8, 4.25]
 let enableSounds = true
+
+export const GameData = engine.defineComponent('game-data', {
+  playerAddress: Schemas.String,
+  playerName: Schemas.String,
+  moves: Schemas.Number,
+  levelStartedAt: Schemas.Int64,
+  levelFinishedAt: Schemas.Int64,
+  currentLevel: Schemas.Number,   
+})
+
+export let gameDataEntity: Entity
 
 const sounds = engine.addEntity()
 
@@ -138,22 +152,45 @@ export function initGame() {
     uiAssets.icons.playText,
     "PLAY GAME",
     () => {
-      // if (setCurrentPlayer()) {
-      //   startGame()
-      // }
-      setCurrentPlayer()
+      // setCurrentPlayer()
+      playersQueue.addPlayer()
     }
   )
 
 
   initDiscs()
-  initPlayerData()
+  // initPlayerData()
   initStatusBoard()
   setupWinAnimations()
 
+  playersQueue.initPlayersQueue(engine, syncEntity, playersApi)
+  playersQueue.listeners.onActivePlayerChange = (player) => {
+    console.log("new active player: ", player.address)
+    const playerData = getPlayer()
+    if (player.address === playerData?.userId){
+      getReadyToStart()
+    }
+  }
+
 }
 
-export function startGame() {
+function getReadyToStart () {
+  // queueDisplay.setScreen(SCREENS.playNext)
+  // setCurrentPlayer()
+  
+  // if (enterCountdown) return
+  // enterCountdown = true
+  // delayedFunction(2, () => {
+      console.log("startGame")
+      startGame()
+      // queueDisplay.disable()
+      // delayedFunction(1, () => enterCountdown = false)
+  // })
+  utils.timers.setTimeout(() => startGame(), 2000)
+}
+
+
+function startGame() {
   movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
   //TODO: add delayed function and countdown
   startLevel(4)
@@ -166,7 +203,7 @@ function undo() {
 }
 
 function onTowerClick(towerNumber: number) {
-  if (!checkCurrentPlayer()) return
+  if (!playersQueue.isActive()) return
 
   if (getSelectedDisc()) {
     validateMove(towerNumber)
@@ -362,8 +399,7 @@ function initDiscs() {
 }
 
 function startLevel(levelN: number) {
-
-  if (!checkCurrentPlayer()) return
+  if (!playersQueue.isActive()) return
 
   clearSelection()
 
@@ -516,7 +552,6 @@ function setupWinAnimations() {
   VisibilityComponent.create(winAnimText, { visible: false })
 }
 
-let winAnimsTime = 0
 function playWinAnimations() {
   const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
   for (const [entity, animator] of animations) {
@@ -524,19 +559,20 @@ function playWinAnimations() {
     Animator.getMutable(entity).states[0].playing = true
   }
 
-  engine.addSystem((dt) => {
-    winAnimsTime += dt
-    if (winAnimsTime >= 8) {
-      winAnimsTime = 0
-      const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
-      for (const [entity, animator, vis] of animations) {
-        VisibilityComponent.getMutable(entity).visible = false
-      }
+  utils.timers.setTimeout(() => {
 
-      if (GameData.get(gameDataEntity).currentLevel < 3) {
+    const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
+    for (const [entity, animator, vis] of animations) {
+      VisibilityComponent.getMutable(entity).visible = false
+    }
+    
+    if (GameData.get(gameDataEntity).currentLevel < 3) {
+      if (playersQueue.getQueue().length) {
+        playersQueue.setNextPlayer()
+      } else {
         startLevel(GameData.get(gameDataEntity).currentLevel + 1)
       }
-      engine.removeSystem('anims-hide')
+      
     }
-  }, undefined, 'anims-hide')
+  }, 8000)
 }

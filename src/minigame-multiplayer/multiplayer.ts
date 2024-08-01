@@ -3,7 +3,7 @@ import { ColliderLayer, engine, Entity, MeshCollider, PlayerIdentityData, Schema
 import { getPlayer } from "@dcl/sdk/src/players"
 import { movePlayerTo } from "~system/RestrictedActions"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
-import { startGame } from "../game"
+// import { startGame } from "../game"
 import { QueueDisplay, SCREENS } from "../minigame-ui/queueDisplay"
 
 const sessionMaxTime = 300 //in seconds
@@ -19,7 +19,7 @@ export const GameData = engine.defineComponent('game-data', {
     moves: Schemas.Number,
     levelStartedAt: Schemas.Int64,
     levelFinishedAt: Schemas.Int64,
-    currentLevel: Schemas.Number,
+    currentLevel: Schemas.Number,   
     queue: Schemas.Array(Schemas.Map({
         name: Schemas.String,
         address: Schemas.String
@@ -108,7 +108,7 @@ function getReadyToStart () {
     enterCountdown = true
     delayedFunction(2, () => {
         console.log("startGame")
-        startGame()
+        // startGame()
         queueDisplay.disable()
         delayedFunction(1, () => enterCountdown = false)
     })
