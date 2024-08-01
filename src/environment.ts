@@ -27,6 +27,20 @@ export function initEnvironment() {
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
+
+    let instructions = engine.addEntity()
+
+    GltfContainer.create(instructions, {
+        src: "assets/scene/instructions.glb"
+
+    })
+
+    Transform.create(instructions, {
+        position: Vector3.create(2, 0, 15.4),
+        scale: Vector3.create(0.8, 0.8, 0.8),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    })
+    
     let sideSignB = engine.addEntity()
 
     GltfContainer.create(sideSignB, {
@@ -40,22 +54,24 @@ export function initEnvironment() {
         rotation: Quaternion.fromEulerDegrees(0, 0, 0)
     })
 
-    let sideSignHeaderA = engine.addEntity()
+    // let sideSignHeaderA = engine.addEntity()
 
-    GltfContainer.create(sideSignHeaderA, {
-        src: "assets/scene/scoreBoardHeader.glb"
+    // GltfContainer.create(sideSignHeaderA, {
+    //     src: "assets/scene/InstructionsHeader.glb"
 
-    })
+    // })
 
-    Transform.create(sideSignHeaderA, {
-        position: Vector3.create(2, 0, 15.4),
-        scale: Vector3.create(0.8, 0.8, 0.8),
-        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
-    })
+    // Transform.create(sideSignHeaderA, {
+    //     position: Vector3.create(2, 0, 15.4),
+    //     scale: Vector3.create(0.8, 0.8, 0.8),
+    //     rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    // })
+
+
     let sideSignHeaderB = engine.addEntity()
 
     GltfContainer.create(sideSignHeaderB, {
-        src: "assets/scene/InstructionsHeader.glb"
+        src: "assets/scene/scoreBoardHeader.glb"
 
     })
 
