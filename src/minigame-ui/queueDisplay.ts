@@ -1,7 +1,10 @@
 import { EasingFunction, Entity, GltfContainer, Material, MeshRenderer, PBVisibilityComponent, TextAlignMode, TextShape, Transform, TransformType, Tween, VisibilityComponent, engine } from "@dcl/sdk/ecs";
 import { Color4, Quaternion, Vector3 } from "@dcl/sdk/math";
-import { GameData, gameDataEntity } from "../minigame-multiplayer/multiplayer";
+// import { GameData, gameDataEntity } from "../minigame-multiplayer/multiplayer";
+import { GameData, gameDataEntity } from "../game"
 import { getPlayer } from "@dcl/sdk/src/players";
+import * as utils from "@dcl-sdk/utils"
+import * as playersQueue from "@dcl-sdk/players-queue/src"
 
 export enum SCREENS {
     addToQueue,
@@ -11,8 +14,8 @@ export enum SCREENS {
 
 export class QueueDisplay {
     frameEntity: Entity
-    frameTransformActive: TransformType
-    frameTransformDisabled: TransformType
+    positionActive: TransformType
+    positionDisabled: TransformType
     displayEntity: Entity
     waitingListEntity: Entity
     myPosEntity: Entity
@@ -23,15 +26,15 @@ export class QueueDisplay {
     constructor(transform: TransformType) {
 
         this.currentScreen = SCREENS.addToQueue
-        this.frameTransformActive = transform
-        this.frameTransformDisabled = {
+        this.positionActive = transform
+        this.positionDisabled = {
             ...transform,
             position: { ...transform.position, y: transform.position.y - 1 }
         }
 
         //FRAME
         this.frameEntity = engine.addEntity()
-        Transform.createOrReplace(this.frameEntity, this.frameTransformDisabled)
+        Transform.createOrReplace(this.frameEntity, this.positionDisabled)
         GltfContainer.create(this.frameEntity, { src: "assets/scene/workstation_display.glb" })
 
         // if (!active) {
@@ -55,27 +58,27 @@ export class QueueDisplay {
 
         this.waitingListEntity = engine.addEntity()
         Transform.create(this.waitingListEntity, {
-            parent: this.displayEntity, 
+            parent: this.displayEntity,
             position: Vector3.create(0, 0.48, 0.01),
-            rotation: Quaternion.fromEulerDegrees(0,180,0)
+            rotation: Quaternion.fromEulerDegrees(0, 180, 0)
         })
-        VisibilityComponent.create(this.waitingListEntity, {visible: false})
-        
+        VisibilityComponent.create(this.waitingListEntity, { visible: false })
+
         this.myPosEntity = engine.addEntity()
         Transform.create(this.myPosEntity, {
-            parent: this.displayEntity, 
+            parent: this.displayEntity,
             position: Vector3.create(-0.3, -0.2, 0.01),
-            rotation: Quaternion.fromEulerDegrees(0,180,0)
+            rotation: Quaternion.fromEulerDegrees(0, 180, 0)
         })
-        VisibilityComponent.create(this.myPosEntity, {visible: false})
+        VisibilityComponent.create(this.myPosEntity, { visible: false })
 
 
 
-        GameData.onChange(gameDataEntity, (data) => this.updateWaitingList(data as any))
+        // GameData.onChange(gameDataEntity, (data) => this.updateWaitingList(data as any))
     }
 
 
-    getScreenUVs(screen: number): number[] {
+    private getScreenUVs(screen: number): number[] {
 
         let blockSize = 1 / 16
         const width = 7
@@ -107,11 +110,19 @@ export class QueueDisplay {
             {
                 mode: Tween.Mode.Move({
                     start: position,
-                    end: this.frameTransformActive.position
+                    end: this.positionActive.position
                 }),
                 duration: 1000,
                 easingFunction: EasingFunction.EF_EASEOUTEXPO
             })
+
+        console.log("setting screen change timeout")
+        utils.timers.setTimeout(() => {
+            console.log("starting screensystem")
+            this.setScreen(SCREENS.queueList)
+            engine.addSystem(this.updateWaitingList)
+        }, 2000)
+
     }
 
     disable() {
@@ -123,57 +134,60 @@ export class QueueDisplay {
             {
                 mode: Tween.Mode.Move({
                     start: position,
-                    end: this.frameTransformDisabled.position
+                    end: this.positionDisabled.position
                 }),
                 duration: 1000,
                 easingFunction: EasingFunction.EF_EASEOUTEXPO
             })
+
+        engine.removeSystem(this.updateWaitingList)
     }
 
     setScreen(screenIndex: number) {
 
         if (screenIndex === SCREENS.queueList) {
-           VisibilityComponent.getMutable(this.waitingListEntity).visible = true
-           VisibilityComponent.getMutable(this.myPosEntity).visible = true
+            VisibilityComponent.getMutable(this.waitingListEntity).visible = true
+            VisibilityComponent.getMutable(this.myPosEntity).visible = true
         } else {
             VisibilityComponent.getMutable(this.waitingListEntity).visible = false
             VisibilityComponent.getMutable(this.myPosEntity).visible = false
         }
-        
-        
+
+
         this.currentScreen = screenIndex
         // MeshRenderer.createOrReplace(this.displayEntity, this.getScreenUVs(this.currentScreen))
         MeshRenderer.deleteFrom(this.displayEntity)
         MeshRenderer.setPlane(this.displayEntity, this.getScreenUVs(this.currentScreen))
-        
+
     }
-    
-    
-    private updateWaitingList(data: queueDataType) {
-        const localPlayer = getPlayer()
-        
-        const playerNames = data.queue.map(player => player.name).slice(0,4)
-        const myPos = GameData.get(gameDataEntity).queue.findIndex(item => item.address === localPlayer?.userId) + 1
 
-        TextShape.createOrReplace(this.waitingListEntity, {
-            text: playerNames.join("\n"),
-            fontSize: 1.1,
-            textAlign: TextAlignMode.TAM_TOP_CENTER,
-            textColor: Color4.Black()
-        })
-        
-        TextShape.createOrReplace(this.myPosEntity, {
-            text: `${myPos}`,
-            fontSize: 2,
-            textAlign: TextAlignMode.TAM_TOP_CENTER
-        })
+    private updateWaitingList(dt: number) {
+            const localPlayer = getPlayer()
 
-        if (localPlayer?.userId !== data.playerAddress && myPos === 0){
-            this.disable()
+            // console.log(playersQueue.getQueue())
+            const playerNames = ['hola', "buen dia"]
+            // const playerNames = data.queue.map(player => player.name).slice(0, 4)
+            // const myPos = GameData.get(gameDataEntity).queue.findIndex(item => item.address === localPlayer?.userId) + 1
+            const myPos = 2
+
+            TextShape.createOrReplace(this.waitingListEntity, {
+                text: playerNames.join("\n"),
+                fontSize: 1.1,
+                textAlign: TextAlignMode.TAM_TOP_CENTER,
+                textColor: Color4.Black()
+            })
+
+            TextShape.createOrReplace(this.myPosEntity, {
+                text: `${myPos}`,
+                fontSize: 2,
+                textAlign: TextAlignMode.TAM_TOP_CENTER
+            })
+
+            // if (localPlayer?.userId !== data.playerAddress && myPos === 0) {
+            //     this.disable()
+            // }
         }
 
-
-    }
 }
 
 

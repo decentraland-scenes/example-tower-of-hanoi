@@ -1,5 +1,6 @@
 import { signedFetch } from "~system/SignedFetch"
-import { GameData, gameDataEntity } from "../minigame-multiplayer/multiplayer"
+// import { GameData, gameDataEntity } from "../minigame-multiplayer/multiplayer"
+import { GameData, gameDataEntity } from "../game"
 import { getPlayer } from "@dcl/sdk/src/players"
 
 const SERVER_URL = 'https://exploration-games.decentraland.zone'

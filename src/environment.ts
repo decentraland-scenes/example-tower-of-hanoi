@@ -117,9 +117,9 @@ export function initEnvironment() {
         volume: 0.5
     })
 
-    const disablePassportsEntity = engine.addEntity()
+    
     console.log("creating disable passports")
-
+    const disablePassportsEntity = engine.addEntity()
     AvatarModifierArea.create(disablePassportsEntity, {
         area: Vector3.create(4, 0, 4),
         modifiers: [AvatarModifierType.AMT_DISABLE_PASSPORTS],

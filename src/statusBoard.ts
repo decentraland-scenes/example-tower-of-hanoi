@@ -1,6 +1,9 @@
 import { engine, Entity, TextAlignMode, TextShape, Transform } from "@dcl/sdk/ecs"
-import { GameData, gameDataEntity } from "./minigame-multiplayer/multiplayer"
+// import { GameData, gameDataEntity } from "./minigame-multiplayer/multiplayer"
+import { GameData, gameDataEntity } from "./game"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
+
+import * as playersQueue from "@dcl-sdk/players-queue/src"
 
 let movesEntity: Entity
 let timeEntity: Entity
@@ -41,7 +44,10 @@ export function initStatusBoard() {
 }
 
 function updateTexts() {
-    const gameData = GameData.get(gameDataEntity)
+    const gameData = GameData.getOrNull(gameDataEntity)
+
+    if (!gameData) return
+
     const gameElapsedTime = ((gameData.levelFinishedAt || Date.now()) - gameData.levelStartedAt) / 1000
     const minutes = Math.floor(gameElapsedTime / 60)
     const seconds = Math.round(gameElapsedTime) - minutes * 60
