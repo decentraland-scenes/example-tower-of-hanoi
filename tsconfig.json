@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "strict": true
+    "strict": true,
+    "types": [
+      "@dcl/js-runtime",
+    ]
   },
   "include": [
     "src/**/*.ts",
