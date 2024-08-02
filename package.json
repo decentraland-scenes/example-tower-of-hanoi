@@ -16,7 +16,7 @@
   "devDependencies": {
     "@dcl/asset-packs": "^1.20.0",
     "@dcl/js-runtime": "7.5.6",
-    "@dcl/sdk": "^7.5.6"
+    "@dcl/sdk": "https://sdk-team-cdn.decentraland.org/@dcl/js-sdk-toolchain/branch/fix/sync-state-multiplayer/dcl-sdk-7.5.7-10215962283.commit-ee02c68.tgz"
   },
   "engines": {
     "node": ">=16.0.0",
