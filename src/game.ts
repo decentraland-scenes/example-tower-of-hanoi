@@ -106,6 +106,7 @@ export function initGame() {
       getReadyToStart()
     } else {
       engine.removeSystem(gameAreaCheck)
+      gameAreaCheck(1)
     }
   }
 
@@ -118,16 +119,13 @@ function gameAreaCheck(dt: number) {
   if (areaCheckTimer >= 1) {
     areaCheckTimer = 0
 
-    if (queue.isActive()) {
-      const transform = Transform.get(engine.PlayerEntity)
+    const transform = Transform.get(engine.PlayerEntity)
 
-      if (transform.position.x >= 5.15 && transform.position.x <= 13.77 &&
-        transform.position.z >= 2.23 && transform.position.z <= 13.77) {
-        //inside game area
-        // console.log("inside")
-      } else {
-        exitPlayer()
-        //todo: blank player data
+    if (transform.position.x >= 5.15 && transform.position.x <= 13.77 &&
+      transform.position.z >= 2.23 && transform.position.z <= 13.77) {
+        console.log("is active: ", queue.isActive())
+        if (!queue.isActive()) {
+        exitPlayer(true)
       }
 
     }
@@ -689,7 +687,7 @@ function startWinAnimation() {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)
         if (nextLevel === 4) {
-          exitPlayer()
+          exitPlayer(true)
         } else {
           startLevel(nextLevel)
           gameButtons[nextLevel]
