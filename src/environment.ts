@@ -1,7 +1,6 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine } from '@dcl/sdk/ecs'
-import { MenuButton } from "./minigame-ui/button";
-import { uiAssets } from "./minigame-ui/resources";
+import { ui } from "@dcl-sdk/mini-games/src"
 
 export function initEnvironment() {
     let backSign = engine.addEntity()
@@ -40,7 +39,7 @@ export function initEnvironment() {
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
-    
+
     let sideSignB = engine.addEntity()
 
     GltfContainer.create(sideSignB, {
@@ -117,7 +116,7 @@ export function initEnvironment() {
         volume: 0.5
     })
 
-    
+
     console.log("creating disable passports")
     const disablePassportsEntity = engine.addEntity()
     AvatarModifierArea.create(disablePassportsEntity, {
@@ -128,16 +127,16 @@ export function initEnvironment() {
 
     Transform.create(disablePassportsEntity, {
         position: Vector3.create(8, 4, 8),
-        scale: Vector3.create(4,4,4)
+        scale: Vector3.create(4, 4, 4)
     })
 
-    new MenuButton({
+    new ui.MenuButton({
         position: Vector3.create(14.9, 5.7, 4.7),
         scale: Vector3.create(2.4, 2.4, 2.4),
         rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
     },
-        uiAssets.shapes.SQUARE_RED,
-        uiAssets.icons.music,
+        ui.uiAssets.shapes.SQUARE_RED,
+        ui.uiAssets.icons.music,
         'Play/Stop Music',
         () => AudioSource.getMutable(music).playing = !AudioSource.get(music).playing
     )

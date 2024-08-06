@@ -3,15 +3,13 @@ import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
-import { queue, queueDisplay } from "@dcl-sdk/mini-games/src"
+import { queue, queueDisplay, ui } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
-import { MenuButton } from './minigame-ui/button'
 // import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, GameData } from './minigame-multiplayer/multiplayer'
 import { initStatusBoard } from './statusBoard'
-import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
 
 let movesHistory: any = []
@@ -19,7 +17,7 @@ const maxDiscs = 7
 const towerLocations = [-1, 11.75, 8, 4.25]
 let enableSounds = true
 
-const gameButtons: MenuButton[] = []
+const gameButtons: ui.MenuButton[] = []
 const towers = ['0', 'click_tower_1', 'click_tower_2', 'click_tower_3']
 
 export const GameData = engine.defineComponent('game-data', {
@@ -52,14 +50,14 @@ export function initGame() {
   initGameButtons()
 
   // start game button
-  new MenuButton(
+  new ui.MenuButton(
     {
       position: Vector3.create(4.26, 1.03, 8),
       rotation: Quaternion.fromEulerDegrees(-45, 90, 0),
       scale: Vector3.create(1.2, 1.2, 1.2)
     },
-    uiAssets.shapes.RECT_GREEN,
-    uiAssets.icons.playText,
+    ui.uiAssets.shapes.RECT_GREEN,
+    ui.uiAssets.icons.playText,
     "PLAY GAME",
     () => {
       // setCurrentPlayer()
@@ -137,79 +135,79 @@ function gameAreaCheck(dt: number) {
 }
 
 function initGameButtons() {
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 4.30, 9.75),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_GREEN,
-    uiAssets.numbers[1],
+    ui.uiAssets.shapes.SQUARE_GREEN,
+    ui.uiAssets.numbers[1],
     "START LEVEL 1",
     () => startLevel(1)
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 4.30, 9),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_GREEN,
-    uiAssets.numbers[2],
+    ui.uiAssets.shapes.SQUARE_GREEN,
+    ui.uiAssets.numbers[2],
     "START LEVEL 2",
     () => startLevel(2)
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 4.30, 8.25),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_GREEN,
-    uiAssets.numbers[3],
+    ui.uiAssets.shapes.SQUARE_GREEN,
+    ui.uiAssets.numbers[3],
     "START LEVEL 3",
     () => startLevel(3)
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 4.30, 6),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_RED,
-    uiAssets.icons.undo,
+    ui.uiAssets.shapes.SQUARE_RED,
+    ui.uiAssets.icons.undo,
     "UNDO LAST MOVE",
     () => undo()
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 4.30, 5.2),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_RED,
-    uiAssets.icons.restart,
+    ui.uiAssets.shapes.SQUARE_RED,
+    ui.uiAssets.icons.restart,
     "RESTART LEVEL",
     () => startLevel(GameData.get(gameDataEntity).currentLevel)
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 5.7, 5.4),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.SQUARE_RED,
-    uiAssets.icons.sound,
+    ui.uiAssets.shapes.SQUARE_RED,
+    ui.uiAssets.icons.sound,
     'Sound FX',
     () => enableSounds = !enableSounds
   ))
 
-  gameButtons.push(new MenuButton({
+  gameButtons.push(new ui.MenuButton({
     position: Vector3.create(14.9, 5.7, 10.8),
     scale: Vector3.create(2.4, 2.4, 2.4),
     rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
   },
-    uiAssets.shapes.RECT_RED,
-    uiAssets.icons.exitText,
+    ui.uiAssets.shapes.RECT_RED,
+    ui.uiAssets.icons.exitText,
     'Exit from game area',
     () => exitPlayer(true)
   ))
@@ -219,7 +217,7 @@ function exitPlayer(move = false) {
   if (move) {
     movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
   }
-  
+
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
   queue.setNextPlayer()
   engine.removeSystem(gameAreaCheck)
@@ -553,7 +551,7 @@ function setupWinAnimations() {
   let winAnimText = engine.addEntity()
 
   GltfContainer.create(winAnimA, {
-    src: "assets/scene/winAnim.glb",
+    src: "mini-game-models/scene/winAnim.glb",
 
   })
 
@@ -576,7 +574,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimB, {
-    src: "assets/scene/winAnim.glb"
+    src: "mini-game-models/scene/winAnim.glb"
 
   })
 
@@ -598,7 +596,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimC, {
-    src: "assets/scene/winAnim.glb"
+    src: "mini-game-models/scene/winAnim.glb"
   })
 
   Transform.create(winAnimC, {
@@ -619,7 +617,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimFollow, {
-    src: "assets/scene/winAnimFollow.glb"
+    src: "mini-game-models/scene/winAnimFollow.glb"
   })
 
   Transform.create(winAnimFollow, {
@@ -641,7 +639,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimText, {
-    src: "assets/scene/winAnimText.glb"
+    src: "mini-game-models/scene/winAnimText.glb"
   })
 
   Animator.create(winAnimText, {
@@ -684,13 +682,13 @@ function startWinAnimation() {
 
     if (GameData.get(gameDataEntity).currentLevel < 3) {
       console.log("playersQueue: ", queue.getQueue())
-//add challenge check
+      //add challenge check
       if (queue.getQueue().length > 1) {
         queue.setNextPlayer()
       } else {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)
-        if (nextLevel === 4){
+        if (nextLevel === 4) {
           exitPlayer()
         } else {
           startLevel(nextLevel)
