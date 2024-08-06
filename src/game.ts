@@ -2,8 +2,7 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
-import playersApi, { getPlayer } from '@dcl/sdk/players'
-// import * as playersQueue from "@dcl-sdk/players-queue/src"
+import { getPlayer } from '@dcl/sdk/players'
 import { queue, queueDisplay } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
@@ -14,7 +13,6 @@ import { MenuButton } from './minigame-ui/button'
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
-// import { disable, enable, init, SCREENS, setScreen } from './minigame-ui/queueDisplay'
 
 let movesHistory: any = []
 const maxDiscs = 7

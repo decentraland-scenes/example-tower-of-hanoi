@@ -3,8 +3,6 @@ import { engine, Entity, TextAlignMode, TextShape, Transform } from "@dcl/sdk/ec
 import { GameData, gameDataEntity } from "./game"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
 
-import * as playersQueue from "@dcl-sdk/players-queue/src"
-
 let movesEntity: Entity
 let timeEntity: Entity
 let playerNameEntity: Entity
