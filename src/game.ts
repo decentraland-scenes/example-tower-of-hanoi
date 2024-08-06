@@ -3,7 +3,9 @@ import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity
 
 import { syncEntity } from '@dcl/sdk/network'
 import playersApi, { getPlayer } from '@dcl/sdk/players'
-import * as playersQueue from "@dcl-sdk/players-queue/src"
+// import * as playersQueue from "@dcl-sdk/players-queue/src"
+import { queue, queueDisplay } from "@dcl-sdk/mini-games/src"
+
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
@@ -12,7 +14,7 @@ import { MenuButton } from './minigame-ui/button'
 import { initStatusBoard } from './statusBoard'
 import { uiAssets } from './minigame-ui/resources'
 import { upsertProgress } from './minigame-server/server'
-import { QueueDisplay, SCREENS } from './minigame-ui/queueDisplay'
+// import { disable, enable, init, SCREENS, setScreen } from './minigame-ui/queueDisplay'
 
 let movesHistory: any = []
 const maxDiscs = 7
@@ -33,7 +35,7 @@ export const GameData = engine.defineComponent('game-data', {
 
 export let gameDataEntity: Entity
 let gameAreaCollider: Entity
-let queueDisplay: QueueDisplay
+// let queueDisplay: QueueDisplay
 
 
 
@@ -63,7 +65,8 @@ export function initGame() {
     "PLAY GAME",
     () => {
       // setCurrentPlayer()
-      playersQueue.addPlayer()
+      queue.addPlayer()
+      // queueDisplay.enable()
       queueDisplay.enable()
 
     }
@@ -75,7 +78,7 @@ export function initGame() {
     scale: Vector3.create(9.75, 16, 12.5)
   })
 
-  queueDisplay = new QueueDisplay({
+  queueDisplay.init({
     position: Vector3.create(4.52, 1.47, 8),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0),
     scale: Vector3.create(1, 1, 1)
@@ -100,7 +103,7 @@ export function initGame() {
   // console.log("init playersQueue")
   // playersQueue.initPlayersQueue(engine, syncEntity, playersApi)
 
-  playersQueue.listeners.onActivePlayerChange = (player) => {
+  queue.listeners.onActivePlayerChange = (player) => {
     console.log("new active player: ", player.address)
     const localPlayer = getPlayer()
     if (player.address === localPlayer?.userId) {
@@ -119,7 +122,7 @@ function gameAreaCheck(dt: number) {
   if (areaCheckTimer >= 1) {
     areaCheckTimer = 0
 
-    if (playersQueue.isActive()) {
+    if (queue.isActive()) {
       const transform = Transform.get(engine.PlayerEntity)
 
       if (transform.position.x >= 5.15 && transform.position.x <= 13.77 &&
@@ -220,7 +223,7 @@ function exitPlayer(move = false) {
   }
   
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-  playersQueue.setNextPlayer()
+  queue.setNextPlayer()
   engine.removeSystem(gameAreaCheck)
 
 }
@@ -286,9 +289,10 @@ function enableGame() {
 }
 
 function getReadyToStart() {
-  queueDisplay.setScreen(SCREENS.playNext)
+  queueDisplay.setScreen(queueDisplay.SCREENS.playNext)
 
   utils.timers.setTimeout(() => {
+    // queueDisplay.disable()
     queueDisplay.disable()
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
     engine.addSystem(gameAreaCheck)
@@ -309,7 +313,7 @@ function undo() {
 }
 
 function onTowerClick(towerNumber: number) {
-  if (!playersQueue.isActive()) return
+  if (!queue.isActive()) return
 
   if (getSelectedDisc()) {
     validateMove(towerNumber)
@@ -504,7 +508,7 @@ function initDiscs() {
 }
 
 function startLevel(levelN: number) {
-  if (!playersQueue.isActive()) return
+  if (!queue.isActive()) return
   const localPlayer = getPlayer()
 
   clearSelection()
@@ -681,10 +685,10 @@ function startWinAnimation() {
     }
 
     if (GameData.get(gameDataEntity).currentLevel < 3) {
-      console.log("playersQueue: ", playersQueue.getQueue())
+      console.log("playersQueue: ", queue.getQueue())
 //add challenge check
-      if (playersQueue.getQueue().length > 1) {
-        playersQueue.setNextPlayer()
+      if (queue.getQueue().length > 1) {
+        queue.setNextPlayer()
       } else {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)

@@ -4,7 +4,7 @@ import { getPlayer } from "@dcl/sdk/src/players"
 import { movePlayerTo } from "~system/RestrictedActions"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
 // import { startGame } from "../game"
-import { QueueDisplay, SCREENS } from "../minigame-ui/queueDisplay"
+// import { QueueDisplay, SCREENS } from "../minigame-ui/queueDisplay"
 
 const sessionMaxTime = 300 //in seconds
 const gameLoopTime = 1 //times in seconds
@@ -28,7 +28,7 @@ export const GameData = engine.defineComponent('game-data', {
 
 export let gameDataEntity: Entity
 
-let queueDisplay: QueueDisplay
+// let queueDisplay: QueueDisplay
 // let queueDisplay: QueueDisplay = new QueueDisplay({
 //     position: Vector3.create(4.52, 1.47, 8),
 //     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
@@ -61,11 +61,11 @@ export function initPlayerData() {
     })
 
     
-    queueDisplay = new QueueDisplay({
-        position: Vector3.create(4.52, 1.47, 8),
-        rotation: Quaternion.fromEulerDegrees(0, -90, 0),
-        scale: Vector3.create(1, 1, 1)
-    })
+    // queueDisplay = new QueueDisplay({
+    //     position: Vector3.create(4.52, 1.47, 8),
+    //     rotation: Quaternion.fromEulerDegrees(0, -90, 0),
+    //     scale: Vector3.create(1, 1, 1)
+    // })
     setCollider()
 }
 
@@ -101,7 +101,7 @@ export function checkPlayerIsAlive() {
 let enterCountdown = false
 
 function getReadyToStart () {
-    queueDisplay.setScreen(SCREENS.playNext)
+    // queueDisplay.setScreen(SCREENS.playNext)
     setCurrentPlayer()
     
     if (enterCountdown) return
@@ -109,7 +109,7 @@ function getReadyToStart () {
     delayedFunction(2, () => {
         console.log("startGame")
         // startGame()
-        queueDisplay.disable()
+        // queueDisplay.disable()
         delayedFunction(1, () => enterCountdown = false)
     })
 }
@@ -175,7 +175,7 @@ export function checkCurrentPlayer() {
 }
 
 export function setCurrentPlayer() {
-    queueDisplay.enable()
+    // queueDisplay.enable()
 
     const localPlayer = getPlayer()
     const multiPlayer = GameData.getMutable(gameDataEntity)
@@ -200,8 +200,8 @@ function addToQueue() {
 
     if (localPlayer && !gameData.queue.find(player => player.address === localPlayer?.userId)) {
         GameData.getMutable(gameDataEntity).queue.push({ address: localPlayer.userId, name: localPlayer.name })
-        queueDisplay.setScreen(SCREENS.addToQueue)
-        delayedFunction(2, () => queueDisplay.setScreen(SCREENS.queueList))
+        // queueDisplay.setScreen(SCREENS.addToQueue)
+        // delayedFunction(2, () => queueDisplay.setScreen(SCREENS.queueList))
     }
 }
 
