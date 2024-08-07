@@ -8,7 +8,6 @@ import { queue, queueDisplay, ui } from "@dcl-sdk/mini-games/src"
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
-// import { gameDataEntity, initPlayerData, setCurrentPlayer, checkCurrentPlayer, GameData } from './minigame-multiplayer/multiplayer'
 import { initStatusBoard } from './statusBoard'
 import { upsertProgress } from './minigame-server/server'
 
@@ -31,9 +30,6 @@ export const GameData = engine.defineComponent('game-data', {
 
 export let gameDataEntity: Entity
 let gameAreaCollider: Entity
-// let queueDisplay: QueueDisplay
-
-
 
 const sounds = engine.addEntity()
 
@@ -60,11 +56,7 @@ export function initGame() {
     ui.uiAssets.icons.playText,
     "PLAY GAME",
     () => {
-      // setCurrentPlayer()
       queue.addPlayer()
-      // queueDisplay.enable()
-      queueDisplay.enable()
-
     }
   )
 
@@ -233,7 +225,6 @@ function initPlayerData() {
 
 function disableGame() {
   MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS)
-  // queueDisplay.disable()
   for (const button of gameButtons) {
     button.disable()
   }
@@ -285,11 +276,7 @@ function enableGame() {
 }
 
 function getReadyToStart() {
-  queueDisplay.setScreen(queueDisplay.SCREENS.playNext)
-
   utils.timers.setTimeout(() => {
-    // queueDisplay.disable()
-    queueDisplay.disable()
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
     engine.addSystem(gameAreaCheck)
 
@@ -551,7 +538,7 @@ function setupWinAnimations() {
   let winAnimText = engine.addEntity()
 
   GltfContainer.create(winAnimA, {
-    src: "mini-game-models/scene/winAnim.glb",
+    src: "models/winAnimations/winAnim.glb",
 
   })
 
@@ -574,7 +561,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimB, {
-    src: "mini-game-models/scene/winAnim.glb"
+    src: "models/winAnimations/winAnim.glb"
 
   })
 
@@ -596,7 +583,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimC, {
-    src: "mini-game-models/scene/winAnim.glb"
+    src: "models/winAnimations/winAnim.glb"
   })
 
   Transform.create(winAnimC, {
@@ -617,7 +604,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimFollow, {
-    src: "mini-game-models/scene/winAnimFollow.glb"
+    src: "models/winAnimations/winAnimFollow.glb"
   })
 
   Transform.create(winAnimFollow, {
@@ -639,7 +626,7 @@ function setupWinAnimations() {
 
 
   GltfContainer.create(winAnimText, {
-    src: "mini-game-models/scene/winAnimText.glb"
+    src: "models/winAnimations/winAnimText.glb"
   })
 
   Animator.create(winAnimText, {
