@@ -125,9 +125,11 @@ function gameAreaCheck(dt: number) {
       transform.position.z >= 2.23 && transform.position.z <= 13.77) {
         console.log("is active: ", queue.isActive())
         if (!queue.isActive()) {
-        exitPlayer(true)
-      }
-
+          exitPlayer(true)
+        }
+    } else if (queue.isActive()) {
+      console.log('active player left the area')
+      exitPlayer()
     }
   }
 }
