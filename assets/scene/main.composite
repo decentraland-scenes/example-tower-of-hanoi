@@ -469,7 +469,7 @@
         "serializationType": "map"
       },
       "data": {
-        "558": {
+        "516": {
           "json": {
             "gizmo": 0
           }
@@ -758,10 +758,12 @@
         "0": {
           "json": {
             "name": "Tower of Hanoi",
-            "description": "Tower of Hanoi",
+            "description": "Classic Tower of Hanoi game",
             "thumbnail": "images/scene-thumbnail.png",
             "ageRating": "T",
-            "categories": [],
+            "categories": [
+              "game"
+            ],
             "author": "SDK",
             "email": "",
             "tags": [],
