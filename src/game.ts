@@ -3,7 +3,7 @@ import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
-import { queue, queueDisplay, ui } from "@dcl-sdk/mini-games/src"
+import { queue, ui } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
@@ -66,7 +66,7 @@ export function initGame() {
     scale: Vector3.create(9.75, 16, 12.5)
   })
 
-  queueDisplay.init({
+  queue.initQueueDisplay({
     position: Vector3.create(4.52, 1.47, 8),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0),
     scale: Vector3.create(1, 1, 1)
