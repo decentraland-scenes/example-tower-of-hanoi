@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, PBTween, Schemas, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBTween, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
@@ -36,6 +36,8 @@ const sounds = engine.addEntity()
 
 Transform.create(sounds, { parent: engine.CameraEntity })
 
+let timer: ui.Timer3D
+
 export const Disc = engine.defineComponent('disc', {
   size: Schemas.Number,
   currentTower: Schemas.Number,
@@ -46,6 +48,15 @@ export function initGame() {
 
   initGameButtons()
 
+  timer = new ui.Timer3D({
+    parent: sceneParentEntity,
+    position: Vector3.create(3, 3, 0),
+    rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+  }, 1, 1, false, 10)
+
+  timer.hide()
+
+
 
   //create planks and click_tower_n
   for (const location of towerLocations) {
@@ -53,20 +64,25 @@ export function initGame() {
     Transform.create(entity, {
       parent: sceneParentEntity,
       position: Vector3.create(3.25, 0, location),
-      scale: Vector3.create(1, 5, 1)
+      scale: Vector3.create(1, 1, 1)
     })
-    MeshCollider.setCylinder(entity, 0.5, 0.5, ColliderLayer.CL_POINTER)
-    // MeshRenderer.setCylinder(entity, 0.5, 0.5)
 
     const plankEntity = engine.addEntity()
-    Transform.create(plankEntity, {
+    GltfContainer.create(plankEntity, { src: `assets/scene/plank.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
+    // Transform.create(plankEntity, {
+    //   parent: entity
+    // })
+
+    const colliderEntity = engine.addEntity()
+    Transform.create(colliderEntity, {
       parent: entity,
-      position: Vector3.create(0, 0, 0),
-      scale: Vector3.create(1, 0.2, 1)
+      position: Vector3.create(0, 1.25, 0),
+      scale: Vector3.create(1, 2.5, 1)
     })
-    GltfContainer.create(plankEntity, { src: `assets/scene/plank.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER })
-    // MeshCollider.create(entity, { collisionMask: ColliderLayer.CL_POINTER })
-    planks.push(entity)
+    MeshCollider.setCylinder(colliderEntity, 0.5, 0.5, ColliderLayer.CL_POINTER)
+    // MeshRenderer.setCylinder(colliderEntity, 0.5, 0.5)
+
+    planks.push(colliderEntity)
   }
 
 
@@ -126,6 +142,7 @@ export function initGame() {
       getReadyToStart()
     } else {
       engine.removeSystem(gameAreaCheck)
+      //call one last time gameAreaCheck to ensure player is outside the game area
       gameAreaCheck(1)
     }
   }
@@ -290,20 +307,18 @@ function disableGame() {
 
     // const entity = engine.getEntityOrNullByName(tower)
 
-    // entity && pointerEventsSystem.removeOnPointerDown(entity)
     pointerEventsSystem.removeOnPointerDown(entity)
   }
 }
 
+let fisrtRound = true
 function enableGame() {
   // MeshCollider.deleteFrom(gameAreaCollider)
   const gameData = GameData.get(gameDataEntity)
-  const myQueue = queue.getQueue().find(item => item.player.address === getPlayer()?.userId)
 
-  if (!myQueue) return
   //setup backsign buttons just the first time
-  if (Date.now() - myQueue.player.joinedAt < 5000) {
-
+  if (fisrtRound) {
+    fisrtRound = false
     //enable buttons from backsign
     gameButtons.forEach((button, i) => {
       if (i <= 2) {
@@ -324,14 +339,14 @@ function enableGame() {
   //add click trigger for towers
   planks.forEach((entity, i) => {
     // const entity = engine.getEntityOrNullByName(tower)
-
+    console.log("add click plank, ", i)
     pointerEventsSystem.onPointerDown(
       {
         entity: entity,
         opts: {
           button: InputAction.IA_POINTER,
           hoverText: `SELECT TOWER ${i + 1}`,
-          maxDistance: 15
+          maxDistance: 10
         }
       },
       () => onTowerClick(i)
@@ -340,17 +355,43 @@ function enableGame() {
 
 }
 
+
+async function countdown(cb: () => void, number: number) {
+
+  // timer.show()
+  // timer.setTimeSeconds(number)
+
+  let currentValue = number
+  let time = 0
+
+  engine.addSystem((dt: number) => {
+    time += dt
+
+    if (time >= 1) {
+      time = 0
+
+      if (currentValue > 0) {
+        timer.show()
+        timer.setTimeAnimated(currentValue--, utils.InterpolationType.EASEEXPO)
+      } else {
+        timer.hide()
+        engine.removeSystem("countdown-system")
+        cb && cb()
+      }
+
+    }
+  }, undefined, "countdown-system")
+
+}
+
 function getReadyToStart() {
-  utils.timers.setTimeout(() => {
+
+  countdown(() => {
+    //TODO: update camera target with sceneParentEntity
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
     engine.addSystem(gameAreaCheck)
-
-    utils.timers.setTimeout(() => {
-      //TODO: add countdown
-      startLevel(1)
-    }, 1000)
-
-  }, 2000)
+    startLevel(1)
+  }, 4)
 }
 
 function undo() {
@@ -560,40 +601,46 @@ function initDiscs() {
 
 function startLevel(levelN: number) {
   if (!queue.isActive()) return
-  const localPlayer = getPlayer()
-  clearSelection()
 
-  const playerData = GameData.getMutable(gameDataEntity)
+  //TODO: add start level countdown
 
-  playerData.levelStartedAt = Date.now()
-  playerData.levelFinishedAt = 0
-  playerData.currentLevel = levelN
-  playerData.moves = 0
+  countdown(() => {
 
-  if (localPlayer) {
-    playerData.playerName = localPlayer.name
-  }
+    const localPlayer = getPlayer()
+    clearSelection()
 
+    const playerData = GameData.getMutable(gameDataEntity)
 
-  const discs = [...engine.getEntitiesWith(Disc)]
+    playerData.levelStartedAt = Date.now()
+    playerData.levelFinishedAt = 0
+    playerData.currentLevel = levelN
+    playerData.moves = 0
 
-  for (var i = 0; i <= maxDiscs - 1; i++) {
-
-    const entity = (discs.find(([entity, disc]) => disc.size === i + 1) || [])[0]
-
-    if (!entity) continue
-
-    if (i <= levelN + 1) {
-      Transform.getMutable(entity).position = { x: 3.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[0] }
-      Disc.getMutable(entity).currentTower = 0
-    } else {
-      Transform.getMutable(entity).position = { x: 3.25, y: -5, z: 13 }
-      Disc.getMutable(entity).currentTower = -1
+    if (localPlayer) {
+      playerData.playerName = localPlayer.name
     }
-    movesHistory = []
-  }
 
-  enableGame()
+
+    const discs = [...engine.getEntitiesWith(Disc)]
+
+    for (var i = 0; i <= maxDiscs - 1; i++) {
+
+      const entity = (discs.find(([entity, disc]) => disc.size === i + 1) || [])[0]
+
+      if (!entity) continue
+
+      if (i <= levelN + 1) {
+        Transform.getMutable(entity).position = { x: 3.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[0] }
+        Disc.getMutable(entity).currentTower = 0
+      } else {
+        Transform.getMutable(entity).position = { x: 3.25, y: -5, z: 13 }
+        Disc.getMutable(entity).currentTower = -1
+      }
+      movesHistory = []
+    }
+
+    enableGame()
+  }, 4)
 
 }
 
