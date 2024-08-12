@@ -2,6 +2,7 @@ import { engine, Entity, TextAlignMode, TextShape, Transform } from "@dcl/sdk/ec
 // import { GameData, gameDataEntity } from "./minigame-multiplayer/multiplayer"
 import { GameData, gameDataEntity } from "./game"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
+import { backSign } from "./environment"
 
 let movesEntity: Entity
 let timeEntity: Entity
@@ -11,22 +12,24 @@ export function initStatusBoard() {
     movesEntity = engine.addEntity()
     timeEntity = engine.addEntity()
     playerNameEntity = engine.addEntity()
-    
+
     Transform.create(movesEntity, {
-      position: Vector3.create(14.85, 5.05, 5.4),
-      rotation: Quaternion.fromEulerDegrees(0, 90, 0)
-    })
-    
-    Transform.create(timeEntity, {
-      position: Vector3.create(14.85, 5.05, 6.6),
-      rotation: Quaternion.fromEulerDegrees(0, 90, 0)
-    })
-    
-    Transform.create(playerNameEntity, {
-      position: Vector3.create(14.85, 5.25, 10.4),
-      rotation: Quaternion.fromEulerDegrees(0, 90, 0)
+        parent: backSign,
+        position: Vector3.create(-2.75, 5.05, 0.2),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
 
+    Transform.create(timeEntity, {
+        parent: backSign,
+        position: Vector3.create(-1.4, 5.05, 0.2),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    })
+
+    Transform.create(playerNameEntity, {
+        parent: backSign,
+        position: Vector3.create(1.9, 5.25, 0.2),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    })
 
     let elapsedTime = 0
     const gameLoopFreq = 1

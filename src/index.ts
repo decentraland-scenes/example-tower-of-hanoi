@@ -11,8 +11,8 @@ const _1_MIN = _1_SEC * 60
 miniGames.initLibrary(engine as any, syncEntity, playersApi, {
     gameId: "4ee1d308-5e1e-4b2b-9e91-9091878a7e3d",
     environment: "dev",
-    // 20 seconds (testing purpose)
-    gameTimeoutMs: _1_MIN
+    gameTimeoutMs: _1_MIN,
+    sceneRotation: 0
 })
 
 export function main() {

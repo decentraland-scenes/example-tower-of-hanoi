@@ -1,23 +1,24 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, Material, MeshCollider, MeshRenderer, PBTween, PlayerIdentityData, Schemas, TextShape, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, PBTween, Schemas, Transform, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
-import { queue, ui } from "@dcl-sdk/mini-games/src"
+import { queue, sceneParentEntity, ui, utilities } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
-import { initStatusBoard } from './statusBoard'
 import { upsertProgress } from './minigame-server/server'
+import { initStatusBoard } from './statusBoard'
+import { backSign } from './environment'
 
 let movesHistory: any = []
 const maxDiscs = 7
-const towerLocations = [-1, 11.75, 8, 4.25]
+const towerLocations = [3.75, 0, -3.75]
 let enableSounds = true
 
 const gameButtons: ui.MenuButton[] = []
-const towers = ['0', 'click_tower_1', 'click_tower_2', 'click_tower_3']
+const planks: Entity[] = []
 
 export const GameData = engine.defineComponent('game-data', {
   playerAddress: Schemas.String,
@@ -45,10 +46,35 @@ export function initGame() {
 
   initGameButtons()
 
+
+  //create planks and click_tower_n
+  for (const location of towerLocations) {
+    const entity = engine.addEntity()
+    Transform.create(entity, {
+      parent: sceneParentEntity,
+      position: Vector3.create(3.25, 0, location),
+      scale: Vector3.create(1, 5, 1)
+    })
+    MeshCollider.setCylinder(entity, 0.5, 0.5, ColliderLayer.CL_POINTER)
+    // MeshRenderer.setCylinder(entity, 0.5, 0.5)
+
+    const plankEntity = engine.addEntity()
+    Transform.create(plankEntity, {
+      parent: entity,
+      position: Vector3.create(0, 0, 0),
+      scale: Vector3.create(1, 0.2, 1)
+    })
+    GltfContainer.create(plankEntity, { src: `assets/scene/plank.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS | ColliderLayer.CL_POINTER })
+    // MeshCollider.create(entity, { collisionMask: ColliderLayer.CL_POINTER })
+    planks.push(entity)
+  }
+
+
   // start game button
   new ui.MenuButton(
     {
-      position: Vector3.create(4.26, 1.03, 8),
+      parent: sceneParentEntity,
+      position: Vector3.create(-3.74, 1.03, 0),
       rotation: Quaternion.fromEulerDegrees(-45, 90, 0),
       scale: Vector3.create(1.2, 1.2, 1.2)
     },
@@ -62,12 +88,14 @@ export function initGame() {
 
   gameAreaCollider = engine.addEntity()
   Transform.create(gameAreaCollider, {
-    position: Vector3.create(9.5, 0, 8),
+    parent: sceneParentEntity,
+    position: Vector3.create(1.5, 0, 0),
     scale: Vector3.create(9.75, 16, 12.5)
   })
 
   queue.initQueueDisplay({
-    position: Vector3.create(4.52, 1.47, 8),
+    parent: sceneParentEntity,
+    position: Vector3.create(-3.48, 1.47, 0),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0),
     scale: Vector3.create(1, 1, 1)
   })
@@ -111,26 +139,48 @@ function gameAreaCheck(dt: number) {
   if (areaCheckTimer >= 1) {
     areaCheckTimer = 0
 
-    const transform = Transform.get(engine.PlayerEntity)
+    const playerTransform = Transform.get(engine.PlayerEntity)
 
-    if (transform.position.x >= 5.15 && transform.position.x <= 13.77 &&
-      transform.position.z >= 2.23 && transform.position.z <= 13.77) {
-        console.log("is active: ", queue.isActive())
-        if (!queue.isActive()) {
-          exitPlayer(true)
-        }
+    const sceneTransform = Transform.get(sceneParentEntity)
+
+    // if (playerTransform.position.x >= 5.15 && playerTransform.position.x <= 13.77 &&
+    //   playerTransform.position.z >= 2.23 && playerTransform.position.z <= 13.77) {
+    //   console.log("is active: ", queue.isActive())
+    //   if (!queue.isActive()) {
+    //     exitPlayer(true)
+    //   }
+    // } else if (queue.isActive()) {
+    //   console.log('active player left the area')
+    //   exitPlayer()
+    // }
+
+    let areaPt1 = Vector3.create(5.15, 0, 2.23)
+    let areaPt2 = Vector3.create(13.77, 0, 13.77)
+
+    let center = Vector3.create(8, 0, 8)
+    let sceneRotation = Transform.get(sceneParentEntity).rotation
+    areaPt1 = utilities.rotateVectorAroundCenter(areaPt1, center, sceneRotation)
+    areaPt2 = utilities.rotateVectorAroundCenter(areaPt2, center, sceneRotation)
+
+    if (utilities.isVectorInsideArea(playerTransform.position, areaPt1, areaPt2)) {
+      console.log("is active: ", queue.isActive())
+      if (!queue.isActive()) {
+        exitPlayer(true)
+      }
     } else if (queue.isActive()) {
       console.log('active player left the area')
       exitPlayer()
     }
+
   }
 }
 
 function initGameButtons() {
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 4.30, 9.75),
+    parent: backSign,
+    position: Vector3.create(1.75, 4.30, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_GREEN,
     ui.uiAssets.numbers[1],
@@ -139,9 +189,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 4.30, 9),
+    parent: backSign,
+    position: Vector3.create(1, 4.30, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_GREEN,
     ui.uiAssets.numbers[2],
@@ -150,9 +201,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 4.30, 8.25),
+    parent: backSign,
+    position: Vector3.create(0.25, 4.30, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_GREEN,
     ui.uiAssets.numbers[3],
@@ -161,9 +213,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 4.30, 6),
+    parent: backSign,
+    position: Vector3.create(-2, 4.30, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_RED,
     ui.uiAssets.icons.undo,
@@ -172,9 +225,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 4.30, 5.2),
+    parent: backSign,
+    position: Vector3.create(-2.75, 4.30, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_RED,
     ui.uiAssets.icons.restart,
@@ -183,9 +237,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 5.7, 5.4),
+    parent: backSign,
+    position: Vector3.create(-2.6, 5.7, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.SQUARE_RED,
     ui.uiAssets.icons.sound,
@@ -194,9 +249,10 @@ function initGameButtons() {
   ))
 
   gameButtons.push(new ui.MenuButton({
-    position: Vector3.create(14.9, 5.7, 10.8),
+    parent: backSign,
+    position: Vector3.create(2.75, 5.7, 0.1),
     scale: Vector3.create(2.4, 2.4, 2.4),
-    rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+    rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
   },
     ui.uiAssets.shapes.RECT_RED,
     ui.uiAssets.icons.exitText,
@@ -230,46 +286,55 @@ function disableGame() {
   }
 
   //remove click trigger for towers
-  for (const tower of towers) {
+  for (const entity of planks) {
 
-    const entity = engine.getEntityOrNullByName(tower)
+    // const entity = engine.getEntityOrNullByName(tower)
 
-    entity && pointerEventsSystem.removeOnPointerDown(entity)
+    // entity && pointerEventsSystem.removeOnPointerDown(entity)
+    pointerEventsSystem.removeOnPointerDown(entity)
   }
 }
 
 function enableGame() {
   // MeshCollider.deleteFrom(gameAreaCollider)
+  const gameData = GameData.get(gameDataEntity)
+  const myQueue = queue.getQueue().find(item => item.player.address === getPlayer()?.userId)
 
-  gameButtons.forEach((button, i) => {
-    if (i <= 2) {
-      // console.log("buttonIndex: ", i)
-      // console.log("currentLevel: ", GameData.get(gameDataEntity).currentLevel)
-      if (i < GameData.get(gameDataEntity).currentLevel) {
-        button.enable()
+  if (!myQueue) return
+  //setup backsign buttons just the first time
+  if (Date.now() - myQueue.player.joinedAt < 5000) {
+
+    //enable buttons from backsign
+    gameButtons.forEach((button, i) => {
+      if (i <= 2) {
+        // console.log("buttonIndex: ", i)
+        // console.log("currentLevel: ", GameData.get(gameDataEntity).currentLevel)
+        if (i < gameData.currentLevel) {
+          button.enable()
+        } else {
+          button.disable()
+        }
+
       } else {
-        button.disable()
+        button.enable()
       }
-
-    } else {
-      button.enable()
-    }
-  })
+    })
+  }
 
   //add click trigger for towers
-  towers.forEach(tower => {
-    const entity = engine.getEntityOrNullByName(tower)
+  planks.forEach((entity, i) => {
+    // const entity = engine.getEntityOrNullByName(tower)
 
-    entity && pointerEventsSystem.onPointerDown(
+    pointerEventsSystem.onPointerDown(
       {
         entity: entity,
         opts: {
           button: InputAction.IA_POINTER,
-          hoverText: `SELECT TOWER ${towers.indexOf(tower)}`,
+          hoverText: `SELECT TOWER ${i + 1}`,
           maxDistance: 15
         }
       },
-      () => onTowerClick(towers.indexOf(tower))
+      () => onTowerClick(i)
     )
   })
 
@@ -335,9 +400,9 @@ function validateMove(tower: number) {
     clearSelection()
 
     //validate win
-    if (tower === 3) {
-      const discs = [...engine.getEntitiesWith(Disc)].filter(disc => disc[1]["currentTower"] !== 0)
-      const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 3)
+    if (tower === 2) {
+      const discs = [...engine.getEntitiesWith(Disc)].filter(disc => disc[1]["currentTower"] !== -1)
+      const towerDiscs = discs.filter(disc => disc[1]["currentTower"] === 2)
 
       if (towerDiscs.length === discs.length) {
 
@@ -474,11 +539,14 @@ function initDiscs() {
 
     const entity = engine.addEntity()
 
-    Transform.create(entity, { position: { x: 11.25, y: -5, z: towerLocations[1] } })
+    Transform.create(entity, {
+      parent: sceneParentEntity,
+      position: { x: 3.25, y: -5, z: towerLocations[0] }
+    })
     GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
     Disc.create(entity, {
       size: i,
-      currentTower: 0
+      currentTower: 1
     })
 
     syncEntity(
@@ -493,7 +561,6 @@ function initDiscs() {
 function startLevel(levelN: number) {
   if (!queue.isActive()) return
   const localPlayer = getPlayer()
-
   clearSelection()
 
   const playerData = GameData.getMutable(gameDataEntity)
@@ -517,11 +584,11 @@ function startLevel(levelN: number) {
     if (!entity) continue
 
     if (i <= levelN + 1) {
-      Transform.getMutable(entity).position = { x: 11.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[1] }
-      Disc.getMutable(entity).currentTower = 1
-    } else {
-      Transform.getMutable(entity).position = { x: 11.25, y: -5, z: 13 }
+      Transform.getMutable(entity).position = { x: 3.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[0] }
       Disc.getMutable(entity).currentTower = 0
+    } else {
+      Transform.getMutable(entity).position = { x: 3.25, y: -5, z: 13 }
+      Disc.getMutable(entity).currentTower = -1
     }
     movesHistory = []
   }
@@ -651,6 +718,12 @@ function setupWinAnimations() {
   VisibilityComponent.create(winAnimC, { visible: false })
   VisibilityComponent.create(winAnimFollow, { visible: false })
   VisibilityComponent.create(winAnimText, { visible: false })
+
+  syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
 }
 
 function startWinAnimation() {
@@ -667,19 +740,19 @@ function startWinAnimation() {
       VisibilityComponent.getMutable(entity).visible = false
     }
 
-    if (GameData.get(gameDataEntity).currentLevel < 3) {
-      console.log("playersQueue: ", queue.getQueue())
+    if (GameData.get(gameDataEntity).currentLevel < 2) {
+      // console.log("playersQueue: ", queue.getQueue())
       //add challenge check
       if (queue.getQueue().length > 1) {
         queue.setNextPlayer()
       } else {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)
-        if (nextLevel === 4) {
+        if (nextLevel === 3) {
           exitPlayer(true)
         } else {
+          gameButtons[nextLevel - 1].enable()
           startLevel(nextLevel)
-          gameButtons[nextLevel]
         }
       }
 

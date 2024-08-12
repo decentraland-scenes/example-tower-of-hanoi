@@ -1,16 +1,19 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine } from '@dcl/sdk/ecs'
-import { ui } from "@dcl-sdk/mini-games/src"
+import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity } from '@dcl/sdk/ecs'
+import { ui, sceneParentEntity } from "@dcl-sdk/mini-games/src"
+
+export let backSign: Entity
 
 export function initEnvironment() {
-    let backSign = engine.addEntity()
+    backSign = engine.addEntity()
 
     GltfContainer.create(backSign, {
         src: "assets/scene/backSign.glb"
     })
 
     Transform.create(backSign, {
-        position: Vector3.create(15, 0, 8),
+        parent: sceneParentEntity,
+        position: Vector3.create(7, 0, 0),
         scale: Vector3.create(1, 1, 1),
         rotation: Quaternion.fromEulerDegrees(0, -90, 0)
     })
@@ -22,7 +25,8 @@ export function initEnvironment() {
     })
 
     Transform.create(sideSignA, {
-        position: Vector3.create(2, 0, 15.4),
+        parent: sceneParentEntity,
+        position: Vector3.create(-6, 0, 7.4),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     })
@@ -35,9 +39,8 @@ export function initEnvironment() {
     })
 
     Transform.create(instructions, {
-        position: Vector3.create(2, 0, 15.4),
-        scale: Vector3.create(0.8, 0.8, 0.8),
-        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+        parent: sideSignA,
+        position: Vector3.create(0, 0, 0)
     })
 
     let sideSignB = engine.addEntity()
@@ -48,36 +51,21 @@ export function initEnvironment() {
     })
 
     Transform.create(sideSignB, {
-        position: Vector3.create(2, 0, 0.6),
+        parent: sceneParentEntity,
+        position: Vector3.create(-6, 0, -7.4),
         scale: Vector3.create(0.8, 0.8, 0.8),
         rotation: Quaternion.fromEulerDegrees(0, 0, 0)
     })
-
-    // let sideSignHeaderA = engine.addEntity()
-
-    // GltfContainer.create(sideSignHeaderA, {
-    //     src: "assets/scene/InstructionsHeader.glb"
-
-    // })
-
-    // Transform.create(sideSignHeaderA, {
-    //     position: Vector3.create(2, 0, 15.4),
-    //     scale: Vector3.create(0.8, 0.8, 0.8),
-    //     rotation: Quaternion.fromEulerDegrees(0, 180, 0)
-    // })
-
 
     let sideSignHeaderB = engine.addEntity()
 
     GltfContainer.create(sideSignHeaderB, {
         src: "assets/scene/scoreBoardHeader.glb"
-
     })
 
     Transform.create(sideSignHeaderB, {
-        position: Vector3.create(2, 0, 0.6),
-        scale: Vector3.create(0.8, 0.8, 0.8),
-        rotation: Quaternion.fromEulerDegrees(0, 0, 0)
+        parent: sideSignB,
+        position: Vector3.create(0, -0.2, 0)
     })
 
     let fence = engine.addEntity()
@@ -88,7 +76,8 @@ export function initEnvironment() {
     })
 
     Transform.create(fence, {
-        position: Vector3.create(8, 0, 8),
+        parent: sceneParentEntity,
+        position: Vector3.create(0, 0, 0),
         scale: Vector3.create(1, 1, 1),
         rotation: Quaternion.fromEulerDegrees(0, -90, 0)
     })
@@ -101,10 +90,16 @@ export function initEnvironment() {
     })
 
     Transform.create(floor, {
-        position: Vector3.create(8, 0, 8),
+        parent: sceneParentEntity,
+        position: Vector3.create(0, 0, 0),
         scale: Vector3.create(1, 1, 1),
         rotation: Quaternion.fromEulerDegrees(0, -90, 0)
     })
+    // Transform.create(floor, {
+    //     position: Vector3.create(8, 0, 8),
+    //     scale: Vector3.create(1, 1, 1),
+    //     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
+    // })
 
     let music = engine.addEntity()
 
@@ -126,14 +121,16 @@ export function initEnvironment() {
     })
 
     Transform.create(disablePassportsEntity, {
-        position: Vector3.create(8, 4, 8),
-        scale: Vector3.create(4, 4, 4)
+        parent: sceneParentEntity,
+        position: Vector3.create(0, 4, 0),
+        scale: Vector3.create(16, 8, 16)
     })
 
     new ui.MenuButton({
-        position: Vector3.create(14.9, 5.7, 4.7),
+        parent: backSign,
+        position: Vector3.create(-3.3, 5.7, 0.1),
         scale: Vector3.create(2.4, 2.4, 2.4),
-        rotation: Quaternion.fromEulerDegrees(-90, 0, 90)
+        rotation: Quaternion.fromEulerDegrees(-90, 90, 90)
     },
         ui.uiAssets.shapes.SQUARE_RED,
         ui.uiAssets.icons.music,
