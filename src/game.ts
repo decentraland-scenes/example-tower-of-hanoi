@@ -748,7 +748,7 @@ function startWinAnimation() {
       } else {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)
-        if (nextLevel === 3) {
+        if (nextLevel === 4) {
           exitPlayer(true)
         } else {
           gameButtons[nextLevel - 1].enable()

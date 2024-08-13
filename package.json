@@ -27,7 +27,7 @@
     "@dcl-sdk/mini-games": "^1.0.0-20240812091533.commit-8842cdd",
     "@dcl-sdk/utils": "^1.2.8",
     "@dcl/asset-packs": "^1.20.0",
-    "@dcl/js-runtime": "https://sdk-team-cdn.decentraland.org/@dcl/js-sdk-toolchain/branch/fix/sync-state-multiplayer/@dcl/js-runtime/dcl-js-runtime-7.5.7-10215962283.commit-ee02c68.tgz",
-    "@dcl/sdk": "https://sdk-team-cdn.decentraland.org/@dcl/js-sdk-toolchain/branch/fix/sync-state-multiplayer/dcl-sdk-7.5.7-10215962283.commit-ee02c68.tgz"
+    "@dcl/js-runtime": "7.5.7-10215962283.commit-ee02c68",
+    "@dcl/sdk": "next"
   }
 }
