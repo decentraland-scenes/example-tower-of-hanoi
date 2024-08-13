@@ -3,12 +3,11 @@ import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity
 
 import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
-import { queue, sceneParentEntity, ui, utilities } from "@dcl-sdk/mini-games/src"
+import { queue, sceneParentEntity, ui, utilities, progress } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
-import { upsertProgress } from './minigame-server/server'
 import { initStatusBoard } from './statusBoard'
 import { backSign } from './environment'
 
@@ -456,7 +455,8 @@ function validateMove(tower: number) {
 
 function onFinishLevel() {
   // console.log("win")
-  GameData.getMutable(gameDataEntity).levelFinishedAt = Date.now()
+  const gameData = GameData.getMutable(gameDataEntity)
+  gameData.levelFinishedAt = Date.now()
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: "sounds/win.mp3",
@@ -464,7 +464,12 @@ function onFinishLevel() {
     volume: 2
   })
 
-  upsertProgress()
+  progress.upsertProgress({
+    level: gameData.currentLevel,
+    time: gameData.levelFinishedAt - gameData.levelStartedAt,
+    moves: gameData.moves
+  })
+
 
   startWinAnimation()
 }

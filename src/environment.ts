@@ -68,6 +68,17 @@ export function initEnvironment() {
         position: Vector3.create(0, -0.2, 0)
     })
 
+    new ui.ScoreBoard({
+        parent: sideSignB,
+        position: Vector3.create(1.3, 4, 0.2),
+        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
+    },
+        2.5,
+        2.8,
+        1.2,
+        ui.TIME_LEVEL_MOVES
+    )
+
     let fence = engine.addEntity()
 
     GltfContainer.create(fence, {

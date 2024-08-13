@@ -1,5 +1,4 @@
 import { engine, Entity, TextAlignMode, TextShape, Transform } from "@dcl/sdk/ecs"
-// import { GameData, gameDataEntity } from "./minigame-multiplayer/multiplayer"
 import { GameData, gameDataEntity } from "./game"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
 import { backSign } from "./environment"
