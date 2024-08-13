@@ -11,13 +11,20 @@ import { movePlayerTo } from '~system/RestrictedActions'
 import { initStatusBoard } from './statusBoard'
 import { backSign } from './environment'
 
-let movesHistory: any = []
 const maxDiscs = 7
 const towerLocations = [3.75, 0, -3.75]
-let enableSounds = true
 
+let enabledSounds = true
+let movesHistory: any = []
 const gameButtons: ui.MenuButton[] = []
 const planks: Entity[] = []
+let gameAreaCollider: Entity
+let timer: ui.Timer3D
+
+const sounds = engine.addEntity()
+Transform.create(sounds, { parent: engine.CameraEntity })
+
+export let gameDataEntity: Entity
 
 export const GameData = engine.defineComponent('game-data', {
   playerAddress: Schemas.String,
@@ -27,15 +34,6 @@ export const GameData = engine.defineComponent('game-data', {
   levelFinishedAt: Schemas.Int64,
   currentLevel: Schemas.Number,
 })
-
-export let gameDataEntity: Entity
-let gameAreaCollider: Entity
-
-const sounds = engine.addEntity()
-
-Transform.create(sounds, { parent: engine.CameraEntity })
-
-let timer: ui.Timer3D
 
 export const Disc = engine.defineComponent('disc', {
   size: Schemas.Number,
@@ -116,7 +114,6 @@ export function initGame() {
   })
 
 
-  //TODO: check if collider always on is ok. Else add remove collider for playing.
   disableGame()
 
   console.log("init discs")
@@ -156,19 +153,6 @@ function gameAreaCheck(dt: number) {
     areaCheckTimer = 0
 
     const playerTransform = Transform.get(engine.PlayerEntity)
-
-    const sceneTransform = Transform.get(sceneParentEntity)
-
-    // if (playerTransform.position.x >= 5.15 && playerTransform.position.x <= 13.77 &&
-    //   playerTransform.position.z >= 2.23 && playerTransform.position.z <= 13.77) {
-    //   console.log("is active: ", queue.isActive())
-    //   if (!queue.isActive()) {
-    //     exitPlayer(true)
-    //   }
-    // } else if (queue.isActive()) {
-    //   console.log('active player left the area')
-    //   exitPlayer()
-    // }
 
     let areaPt1 = Vector3.create(5.15, 0, 2.23)
     let areaPt2 = Vector3.create(13.77, 0, 13.77)
@@ -261,7 +245,7 @@ function initGameButtons() {
     ui.uiAssets.shapes.SQUARE_RED,
     ui.uiAssets.icons.sound,
     'Sound FX',
-    () => enableSounds = !enableSounds
+    () => enabledSounds = !enabledSounds
   ))
 
   gameButtons.push(new ui.MenuButton({
@@ -296,6 +280,7 @@ function initPlayerData() {
 }
 
 function disableGame() {
+  //TODO: check if collider always on is ok. Else add remove collider for playing.
   MeshCollider.setBox(gameAreaCollider, ColliderLayer.CL_PHYSICS)
   for (const button of gameButtons) {
     button.disable()
@@ -303,9 +288,6 @@ function disableGame() {
 
   //remove click trigger for towers
   for (const entity of planks) {
-
-    // const entity = engine.getEntityOrNullByName(tower)
-
     pointerEventsSystem.removeOnPointerDown(entity)
   }
 }
@@ -315,20 +297,18 @@ function enableGame() {
   // MeshCollider.deleteFrom(gameAreaCollider)
   const gameData = GameData.get(gameDataEntity)
 
-  //setup backsign buttons just the first time
+  //setup backsign buttons only the first time
   if (fisrtRound) {
     fisrtRound = false
     //enable buttons from backsign
     gameButtons.forEach((button, i) => {
       if (i <= 2) {
-        // console.log("buttonIndex: ", i)
-        // console.log("currentLevel: ", GameData.get(gameDataEntity).currentLevel)
+        //set level buttons according to currentLevel
         if (i < gameData.currentLevel) {
           button.enable()
         } else {
           button.disable()
         }
-
       } else {
         button.enable()
       }
@@ -337,8 +317,7 @@ function enableGame() {
 
   //add click trigger for towers
   planks.forEach((entity, i) => {
-    // const entity = engine.getEntityOrNullByName(tower)
-    console.log("add click plank, ", i)
+
     pointerEventsSystem.onPointerDown(
       {
         entity: entity,
@@ -357,11 +336,8 @@ function enableGame() {
 
 async function countdown(cb: () => void, number: number) {
 
-  // timer.show()
-  // timer.setTimeSeconds(number)
-
   let currentValue = number
-  let time = 0
+  let time = 1
 
   engine.addSystem((dt: number) => {
     time += dt
@@ -385,6 +361,11 @@ async function countdown(cb: () => void, number: number) {
 
 function getReadyToStart() {
 
+  AudioSource.createOrReplace(sounds, {
+    audioClipUrl: "sounds/pre_countdown.mp3",
+    playing: enabledSounds
+  })
+
   countdown(() => {
     //TODO: update camera target with sceneParentEntity
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
@@ -397,7 +378,6 @@ function undo() {
   const [entity, disc] = movesHistory.pop()
   landDisc(entity, disc.currentTower)
   GameData.getMutable(gameDataEntity).moves = movesHistory.length
-
 }
 
 function onTowerClick(towerNumber: number) {
@@ -420,7 +400,7 @@ function validateMove(tower: number) {
   const selected = getSelectedDisc()
   if (!selected) return
 
-  //disc is already on current tower
+  //disc is already on currentTower
   if (selected[1].currentTower === tower) {
     landDisc(selected[0], tower)
     clearSelection()
@@ -454,13 +434,12 @@ function validateMove(tower: number) {
 }
 
 function onFinishLevel() {
-  // console.log("win")
   const gameData = GameData.getMutable(gameDataEntity)
   gameData.levelFinishedAt = Date.now()
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: "sounds/win.mp3",
-    playing: enableSounds,
+    playing: enabledSounds,
     volume: 2
   })
 
@@ -521,7 +500,7 @@ function landDisc(discEntity: Entity, tower: number) {
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: 'sounds/place.mp3',
-    playing: enableSounds,
+    playing: enabledSounds,
   })
 }
 
@@ -573,10 +552,9 @@ function elevateDisc(discEntity: Entity) {
     easingFunction: EasingFunction.EF_EASEOUTQUAD,
   })
 
-
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: 'sounds/select.mp3',
-    playing: enableSounds,
+    playing: enabledSounds,
   })
 }
 
@@ -597,7 +575,7 @@ function initDiscs() {
 
     syncEntity(
       entity,
-      [Transform.componentId, Disc.componentId],
+      [Tween.componentId, Disc.componentId],
       5000 + i
     )
   }
@@ -607,7 +585,10 @@ function initDiscs() {
 function startLevel(levelN: number) {
   if (!queue.isActive()) return
 
-  //TODO: add start level countdown
+  AudioSource.createOrReplace(sounds, {
+    audioClipUrl: "sounds/countdown.mp3",
+    playing: enabledSounds
+  })
 
   countdown(() => {
 
@@ -677,8 +658,6 @@ function setupWinAnimations() {
     ]
   })
 
-
-
   GltfContainer.create(winAnimB, {
     src: "models/winAnimations/winAnim.glb"
 
@@ -700,7 +679,6 @@ function setupWinAnimations() {
     ]
   })
 
-
   GltfContainer.create(winAnimC, {
     src: "models/winAnimations/winAnim.glb"
   })
@@ -720,7 +698,6 @@ function setupWinAnimations() {
       }
     ]
   })
-
 
   GltfContainer.create(winAnimFollow, {
     src: "models/winAnimations/winAnimFollow.glb"
@@ -742,7 +719,6 @@ function setupWinAnimations() {
       }
     ]
   })
-
 
   GltfContainer.create(winAnimText, {
     src: "models/winAnimations/winAnimText.glb"
@@ -780,7 +756,7 @@ function setupWinAnimations() {
 
 function startWinAnimation() {
   const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
-  for (const [entity, animator] of animations) {
+  for (const [entity] of animations) {
     VisibilityComponent.getMutable(entity).visible = true
     Animator.getMutable(entity).states[0].playing = true
   }
@@ -788,7 +764,7 @@ function startWinAnimation() {
   utils.timers.setTimeout(() => {
 
     const animations = engine.getEntitiesWith(Animator, VisibilityComponent)
-    for (const [entity, animator, vis] of animations) {
+    for (const [entity] of animations) {
       VisibilityComponent.getMutable(entity).visible = false
     }
 
@@ -807,7 +783,6 @@ function startWinAnimation() {
           startLevel(nextLevel)
         }
       }
-
     }
   }, 8000)
 }
