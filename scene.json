@@ -13,7 +13,9 @@
     "email": ""
   },
   "main": "bin/index.js",
-  "tags": ["game"],
+  "tags": [
+    "game"
+  ],
   "scene": {
     "parcels": [
       "0,0"
@@ -49,5 +51,8 @@
     "voiceChat": "enabled",
     "portableExperiences": "enabled"
   },
-  "rating": "T"
+  "rating": "T",
+  "worldConfiguration": {
+    "name": "towerofhanoi.dcl.eth"
+  }
 }

@@ -69,9 +69,9 @@ export function initGame() {
 
     const plankEntity = engine.addEntity()
     GltfContainer.create(plankEntity, { src: `assets/scene/plank.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
-    // Transform.create(plankEntity, {
-    //   parent: entity
-    // })
+    Transform.create(plankEntity, {
+      parent: entity
+    })
 
     const colliderEntity = engine.addEntity()
     Transform.create(colliderEntity, {
