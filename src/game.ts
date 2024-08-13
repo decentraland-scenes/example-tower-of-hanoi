@@ -136,44 +136,44 @@ export function initGame() {
     const localPlayer = getPlayer()
     if (player.address === localPlayer?.userId) {
       getReadyToStart()
-    } else {
-      engine.removeSystem(gameAreaCheck)
+    // } else {
+      // engine.removeSystem(gameAreaCheck)
       //call one last time gameAreaCheck to ensure player is outside the game area
-      gameAreaCheck(1)
+      // gameAreaCheck(1)
     }
   }
 
 }
 
 let areaCheckTimer = 0
-function gameAreaCheck(dt: number) {
-  areaCheckTimer += dt
+// function gameAreaCheck(dt: number) {
+//   areaCheckTimer += dt
 
-  if (areaCheckTimer >= 1) {
-    areaCheckTimer = 0
+//   if (areaCheckTimer >= 1) {
+//     areaCheckTimer = 0
 
-    const playerTransform = Transform.get(engine.PlayerEntity)
+//     const playerTransform = Transform.get(engine.PlayerEntity)
 
-    let areaPt1 = Vector3.create(5.15, 0, 2.23)
-    let areaPt2 = Vector3.create(13.77, 0, 13.77)
+//     let areaPt1 = Vector3.create(5.15, 0, 2.23)
+//     let areaPt2 = Vector3.create(13.77, 0, 13.77)
 
-    let center = Vector3.create(8, 0, 8)
-    let sceneRotation = Transform.get(sceneParentEntity).rotation
-    areaPt1 = utilities.rotateVectorAroundCenter(areaPt1, center, sceneRotation)
-    areaPt2 = utilities.rotateVectorAroundCenter(areaPt2, center, sceneRotation)
+//     let center = Vector3.create(8, 0, 8)
+//     let sceneRotation = Transform.get(sceneParentEntity).rotation
+//     areaPt1 = utilities.rotateVectorAroundCenter(areaPt1, center, sceneRotation)
+//     areaPt2 = utilities.rotateVectorAroundCenter(areaPt2, center, sceneRotation)
 
-    if (utilities.isVectorInsideArea(playerTransform.position, areaPt1, areaPt2)) {
-      console.log("is active: ", queue.isActive())
-      if (!queue.isActive()) {
-        exitPlayer(true)
-      }
-    } else if (queue.isActive()) {
-      console.log('active player left the area')
-      exitPlayer()
-    }
+//     if (utilities.isVectorInsideArea(playerTransform.position, areaPt1, areaPt2)) {
+//       console.log("is active: ", queue.isActive())
+//       if (!queue.isActive()) {
+//         exitPlayer(true)
+//       }
+//     } else if (queue.isActive()) {
+//       console.log('active player left the area')
+//       exitPlayer()
+//     }
 
-  }
-}
+//   }
+// }
 
 function initGameButtons() {
   gameButtons.push(new ui.MenuButton({
@@ -268,7 +268,7 @@ function exitPlayer(move = false) {
 
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
   queue.setNextPlayer()
-  engine.removeSystem(gameAreaCheck)
+  // engine.removeSystem(gameAreaCheck)
 
 }
 function initPlayerData() {
@@ -369,7 +369,7 @@ function getReadyToStart() {
   countdown(() => {
     //TODO: update camera target with sceneParentEntity
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
-    engine.addSystem(gameAreaCheck)
+    // engine.addSystem(gameAreaCheck)
     startLevel(1)
   }, 4)
 }
