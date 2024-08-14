@@ -575,7 +575,7 @@ function initDiscs() {
 
     syncEntity(
       entity,
-      [Tween.componentId, Disc.componentId],
+      [Transform.componentId, Disc.componentId],
       5000 + i
     )
   }
