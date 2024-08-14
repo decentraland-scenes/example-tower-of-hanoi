@@ -70,13 +70,13 @@ export function initEnvironment() {
 
     new ui.ScoreBoard({
         parent: sideSignB,
-        position: Vector3.create(1.3, 4, 0.2),
+        position: Vector3.create(1.3, 4, 0.15),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
     },
         2.5,
         2.8,
         1.2,
-        ui.TIME_LEVEL_MOVES
+        ui.TIME_LEVEL
     )
 
     let fence = engine.addEntity()

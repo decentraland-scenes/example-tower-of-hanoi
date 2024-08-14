@@ -31,12 +31,12 @@ export function initStatusBoard() {
     })
 
     let elapsedTime = 0
-    const gameLoopFreq = 1
+    const gameLoopPeriod = 0.3
 
     engine.addSystem((dt: number) => {
         elapsedTime += dt
 
-        if (elapsedTime >= gameLoopFreq) {
+        if (elapsedTime >= gameLoopPeriod) {
             elapsedTime = 0
             updateTexts()
         }
