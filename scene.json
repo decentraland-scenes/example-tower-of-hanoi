@@ -18,9 +18,9 @@
   ],
   "scene": {
     "parcels": [
-      "0,0"
+      "-149,108"
     ],
-    "base": "0,0"
+    "base": "-149,108"
   },
   "spawnPoints": [
     {
@@ -51,8 +51,5 @@
     "voiceChat": "enabled",
     "portableExperiences": "enabled"
   },
-  "rating": "T",
-  "worldConfiguration": {
-    "name": "towerofhanoi.dcl.eth"
-  }
+  "rating": "T"
 }
