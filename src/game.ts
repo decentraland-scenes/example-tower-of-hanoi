@@ -619,7 +619,7 @@ function setupWinAnimations() {
   let winAnimText = engine.addEntity()
 
   GltfContainer.create(winAnimA, {
-    src: "models/winAnimations/winAnim.glb",
+    src: "mini-game-assets/models/winAnim.glb",
 
   })
 
@@ -640,7 +640,7 @@ function setupWinAnimations() {
   })
 
   GltfContainer.create(winAnimB, {
-    src: "models/winAnimations/winAnim.glb"
+    src: "mini-game-assets/models/winAnim.glb"
 
   })
 
@@ -661,7 +661,7 @@ function setupWinAnimations() {
   })
 
   GltfContainer.create(winAnimC, {
-    src: "models/winAnimations/winAnim.glb"
+    src: "mini-game-assets/models/winAnim.glb"
   })
 
   Transform.create(winAnimC, {
@@ -681,7 +681,7 @@ function setupWinAnimations() {
   })
 
   GltfContainer.create(winAnimFollow, {
-    src: "models/winAnimations/winAnimFollow.glb"
+    src: "mini-game-assets/models/winAnimFollow.glb"
   })
 
   Transform.create(winAnimFollow, {
@@ -702,7 +702,7 @@ function setupWinAnimations() {
   })
 
   GltfContainer.create(winAnimText, {
-    src: "models/winAnimations/winAnimText.glb"
+    src: "mini-game-assets/models/winAnimText.glb"
   })
 
   Animator.create(winAnimText, {
