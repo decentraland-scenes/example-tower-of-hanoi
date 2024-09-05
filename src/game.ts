@@ -14,6 +14,7 @@ import { backSign } from './environment'
 const maxLevel = 5
 const maxDiscs = maxLevel + 2
 const towerLocations = [3.75, 0, -3.75]
+const startLevelCoundown = 4
 
 let enabledSounds = true
 let movesHistory: any = []
@@ -105,6 +106,7 @@ export function initGame() {
       getReadyToStart()
     } else {
       GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
+      disableGame()
     }
   }
 
@@ -164,7 +166,9 @@ function initGameButtons() {
       ui.uiAssets.shapes.SQUARE_GREEN,
       ui.uiAssets.numbers[i + 1],
       `START LEVEL ${i + 1}`,
-      () => startLevel(i + 1)
+      () => startLevel(i + 1),
+      undefined,
+      startLevelCoundown * 1000
     ))
   }
 
@@ -213,7 +217,9 @@ function initGameButtons() {
     ui.uiAssets.shapes.SQUARE_RED,
     ui.uiAssets.icons.restart,
     "RESTART LEVEL",
-    () => startLevel(GameData.get(gameDataEntity).currentLevel)
+    () => startLevel(GameData.get(gameDataEntity).currentLevel),
+    undefined,
+    startLevelCoundown * 1000
   ))
 
   gameButtons.push(new ui.MenuButton({
@@ -248,6 +254,7 @@ function exitPlayer(move = false) {
   
   disableGame()
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
+  
   queue.setNextPlayer()
 }
 function initPlayerData() {
@@ -284,7 +291,9 @@ function enableGame() {
       if (i <= maxLevel - 1) {
         //set level buttons according to currentLevel
         //TODO: check max level played on progress
-        if (i < maxProgress?.level ?? gameData.currentLevel) {
+        if (i === 0) {
+          button.enable()
+        }else if (i < maxProgress?.level ?? gameData.currentLevel) {
           button.enable()
         } else {
           button.disable()
@@ -607,7 +616,7 @@ function startLevel(levelN: number) {
     }
 
     enableGame()
-  }, 4)
+  }, startLevelCoundown)
 
 }
 

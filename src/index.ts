@@ -12,13 +12,14 @@ const _1_MIN = _1_SEC * 60
 miniGames.initLibrary(engine as any, syncEntity, playersApi, {
     gameId: "4ee1d308-5e1e-4b2b-9e91-9091878a7e3d",
     environment: "dev",
-    gameTimeoutMs: _1_MIN,
+    gameTimeoutMs: 3 * _1_MIN,
+    inactiveTimeoutMs: 20 * _1_SEC,
     sceneRotation: 0,
     gameArea: {
         topLeft: Vector3.create(5.15, 0, 2.23),
         bottomRight: Vector3.create(13.77, 0, 13.77),
         exitSpawnPoint: Vector3.create(0,0,7)
-    }
+    },
 })
 
 export function main() {
