@@ -290,10 +290,9 @@ function enableGame() {
     gameButtons.forEach((button, i) => {
       if (i <= maxLevel - 1) {
         //set level buttons according to currentLevel
-        //TODO: check max level played on progress
         if (i === 0) {
           button.enable()
-        }else if (i < maxProgress?.level ?? gameData.currentLevel) {
+        }else if ( i < (maxProgress?.level ?? gameData.currentLevel) ) {
           button.enable()
         } else {
           button.disable()
