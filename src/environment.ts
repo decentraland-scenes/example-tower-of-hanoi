@@ -13,7 +13,7 @@ export function initEnvironment() {
 
     Transform.create(backSign, {
         parent: sceneParentEntity,
-        position: Vector3.create(7, 0, 0),
+        position: Vector3.create(6, 0, 0),
         scale: Vector3.create(1, 1, 1),
         rotation: Quaternion.fromEulerDegrees(0, -90, 0)
     })

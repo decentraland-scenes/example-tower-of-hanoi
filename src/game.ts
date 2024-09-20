@@ -107,6 +107,7 @@ export function initGame() {
     } else {
       GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
       disableGame()
+      firstRound = true
     }
   }
 
@@ -251,7 +252,7 @@ function exitPlayer(move = false) {
   if (move) {
     movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
   }
-  
+  firstRound =  true
   disableGame()
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
   
@@ -278,14 +279,14 @@ function disableGame() {
   }
 }
 
-let fisrtRound = true
+let firstRound = true
 function enableGame() {
   // MeshCollider.deleteFrom(gameAreaCollider)
   const gameData = GameData.get(gameDataEntity)
 
   //setup backsign buttons only the first time
-  if (fisrtRound) {
-    fisrtRound = false
+  if (firstRound) {
+    firstRound = false
     //enable buttons from backsign
     gameButtons.forEach((button, i) => {
       if (i <= maxLevel - 1) {
@@ -765,7 +766,7 @@ function startWinAnimation() {
       } else {
         const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
         console.log(nextLevel)
-        if (nextLevel === 4) {
+        if (nextLevel === maxLevel + 1) {
           queue.setNextPlayer()
         } else {
           gameButtons[nextLevel - 1].enable()
