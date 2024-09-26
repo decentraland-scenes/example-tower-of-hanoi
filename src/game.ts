@@ -105,7 +105,6 @@ export function initGame() {
     if (player?.address === localPlayer?.userId) {
       getReadyToStart()
     } else {
-      GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
       disableGame()
       firstRound = true
     }
@@ -255,7 +254,7 @@ function exitPlayer(move = false) {
   firstRound =  true
   disableGame()
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-  
+
   queue.setNextPlayer()
 }
 function initPlayerData() {
@@ -557,19 +556,16 @@ function initDiscs() {
       parent: sceneParentEntity,
       position: { x: 3.25, y: -5, z: towerLocations[0] }
     })
+
     GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
-    Disc.create(entity, {
-      size: i,
-      currentTower: 1
-    })
+    Disc.create(entity, { size: i, currentTower: 1 })
 
     syncEntity(
       entity,
-      [Transform.componentId, Disc.componentId],
+      [Tween.componentId, Disc.componentId],
       5000 + i
     )
   }
-
 }
 
 function startLevel(levelN: number) {
@@ -606,10 +602,24 @@ function startLevel(levelN: number) {
       if (!entity) continue
 
       if (i <= levelN + 1) {
-        Transform.getMutable(entity).position = { x: 3.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[0] }
+        Tween.createOrReplace(entity, {
+          mode: Tween.Mode.Move({
+            start: Transform.get(entity).position,
+            end: { x: 3.25, y: getLandingHeight(levelN + 1 - i), z: towerLocations[0] }
+          }),
+          duration: 300,
+          easingFunction: EasingFunction.EF_EASEOUTEXPO
+        })
         Disc.getMutable(entity).currentTower = 0
       } else {
-        Transform.getMutable(entity).position = { x: 3.25, y: -5, z: 13 }
+        Tween.createOrReplace(entity, {
+          mode: Tween.Mode.Move({
+            start: Transform.get(entity).position,
+            end: { x: 3.25, y: -5, z: 13 }
+          }),
+          duration: 10,
+          easingFunction: EasingFunction.EF_EASEOUTEXPO
+        })
         Disc.getMutable(entity).currentTower = -1
       }
       movesHistory = []

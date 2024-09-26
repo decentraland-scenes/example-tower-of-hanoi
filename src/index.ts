@@ -18,7 +18,7 @@ miniGames.initLibrary(engine as any, syncEntity, playersApi, {
     gameArea: {
         topLeft: Vector3.create(5.15, 0, 2.23),
         bottomRight: Vector3.create(13.77, 0, 13.77),
-        exitSpawnPoint: Vector3.create(0,0,7)
+        exitSpawnPoint: Vector3.create(1,1,7)
     },
 })
 
