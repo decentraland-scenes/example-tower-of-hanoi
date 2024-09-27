@@ -10,7 +10,7 @@ const _1_SEC = 1000
 const _1_MIN = _1_SEC * 60
 
 miniGames.initLibrary(engine as any, syncEntity, playersApi, {
-    gameId: "85f0bf9d-7d93-4952-ba5e-f3dcd37c0e5b",
+    gameId: "4ee1d308-5e1e-4b2b-9e91-9091878a7e3d",
     environment: "prd",
     gameTimeoutMs: 3 * _1_MIN,
     inactiveTimeoutMs: 20 * _1_SEC,
