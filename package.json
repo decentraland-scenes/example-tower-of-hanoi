@@ -24,7 +24,7 @@
     "trailingComma": "none"
   },
   "devDependencies": {
-    "@dcl-sdk/mini-games": "^1.0.0-20240925194246.commit-729deb3",
+    "@dcl-sdk/mini-games": "^1.0.0-20240927225302.commit-53b3033",
     "@dcl-sdk/utils": "^1.2.8"
   },
   "dependencies": {

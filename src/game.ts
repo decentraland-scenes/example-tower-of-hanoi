@@ -17,7 +17,7 @@ const towerLocations = [3.75, 0, -3.75]
 const startLevelCoundown = 4
 
 let enabledSounds = true
-let movesHistory: any = []
+let movesHistory: [Entity, ReturnType<(typeof Disc)['getMutable']>][] = []
 const gameButtons: ui.MenuButton[] = []
 const planks: Entity[] = []
 let gameAreaCollider: Entity
@@ -364,9 +364,14 @@ function getReadyToStart() {
 }
 
 function undo() {
-  const [entity, disc] = movesHistory.pop()
-  landDisc(entity, disc.currentTower)
-  GameData.getMutable(gameDataEntity).moves = movesHistory.length
+  if (movesHistory.length) {
+    const lastMove = movesHistory.pop()
+    if (lastMove) {
+      const [entity, disc] = lastMove
+      landDisc(entity, disc.currentTower)
+      GameData.getMutable(gameDataEntity).moves = movesHistory.length
+    }
+  }
 }
 
 function onTowerClick(towerNumber: number) {
