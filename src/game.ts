@@ -115,6 +115,7 @@ export function initGame() {
 async function getMaxProgress() {
   const req = await progress.getProgress('level', progress.SortDirection.DESC, 1)
   if (req?.length) maxProgress = req[0]
+  // console.log("getting player progress", req)
 }
 
 function initPlanks() {
@@ -292,7 +293,7 @@ function enableGame() {
         //set level buttons according to currentLevel
         if (i === 0) {
           button.enable()
-        }else if ( i < (maxProgress?.level ?? gameData.currentLevel) ) {
+        }else if ( i <= (maxProgress?.level ?? gameData.currentLevel) ) {
           button.enable()
         } else {
           button.disable()
@@ -348,6 +349,7 @@ async function countdown(cb: () => void, number: number) {
 }
 
 function getReadyToStart() {
+  getMaxProgress()
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: "sounds/pre_countdown.mp3",
