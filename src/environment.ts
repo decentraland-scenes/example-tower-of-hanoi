@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity } from '@dcl/sdk/ecs'
+import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity, MeshCollider, ColliderLayer } from '@dcl/sdk/ecs'
 import { ui, sceneParentEntity } from "@dcl-sdk/mini-games/src"
 
 export let backSign: Entity
@@ -148,4 +148,15 @@ export function initEnvironment() {
         'Play/Stop Music',
         () => AudioSource.getMutable(music).playing = !AudioSource.get(music).playing
     )
+
+    const towersCollider = engine.addEntity()
+    Transform.create(towersCollider, {
+        parent: sceneParentEntity,
+        position: Vector3.create(1.5, 8, 0),
+        rotation: Quaternion.fromEulerDegrees(0,90,0),
+        scale: Vector3.create(12.5,16,1)
+    })
+    MeshCollider.setPlane(towersCollider, ColliderLayer.CL_PHYSICS)
+
+    // MeshRenderer.setPlane(towersCollider)
 }
