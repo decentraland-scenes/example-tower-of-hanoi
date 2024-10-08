@@ -27,7 +27,7 @@
     "@dcl-sdk/utils": "^1.2.8"
   },
   "dependencies": {
-    "@dcl-sdk/mini-games": "^1.0.0-20241001074333.commit-c2865dd",
-    "@dcl/sdk": "^7.6.0"
+    "@dcl-sdk/mini-games": "^1.0.0-20241004165406.commit-a103d3a",
+    "@dcl/sdk": "^7.6.1"
   }
 }

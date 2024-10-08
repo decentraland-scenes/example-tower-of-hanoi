@@ -1,8 +1,10 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity, MeshCollider, ColliderLayer } from '@dcl/sdk/ecs'
 import { ui, sceneParentEntity } from "@dcl-sdk/mini-games/src"
+import { LEVEL, MOVES, ScoreBoard, SCOREBOARD_VALUE_TYPE, TIME } from '@dcl-sdk/mini-games/src/ui'
 
 export let backSign: Entity
+export let scoreboard: ScoreBoard
 
 export function initEnvironment() {
     backSign = engine.addEntity()
@@ -68,7 +70,7 @@ export function initEnvironment() {
         position: Vector3.create(0, -0.2, 0)
     })
 
-    new ui.ScoreBoard({
+    scoreboard = new ui.ScoreBoard({
         parent: sideSignB,
         position: Vector3.create(1.3, 4, 0.15),
         rotation: Quaternion.fromEulerDegrees(0, 180, 0)
@@ -76,7 +78,12 @@ export function initEnvironment() {
         2.5,
         2.8,
         1.2,
-        ui.TIME_LEVEL
+        [TIME, MOVES, LEVEL],
+        {
+            showButtons: false,
+            sortBy: SCOREBOARD_VALUE_TYPE.MOVES,
+            sortDirection: 'asc'
+        }
     )
 
     let fence = engine.addEntity()
@@ -146,15 +153,17 @@ export function initEnvironment() {
         ui.uiAssets.shapes.SQUARE_RED,
         ui.uiAssets.icons.music,
         'Play/Stop Music',
-        () => AudioSource.getMutable(music).playing = !AudioSource.get(music).playing
+        () => AudioSource.getMutable(music).playing = !AudioSource.get(music).playing,
+        undefined,
+        10
     )
 
     const towersCollider = engine.addEntity()
     Transform.create(towersCollider, {
         parent: sceneParentEntity,
         position: Vector3.create(1.5, 8, 0),
-        rotation: Quaternion.fromEulerDegrees(0,90,0),
-        scale: Vector3.create(12.5,16,1)
+        rotation: Quaternion.fromEulerDegrees(0, 90, 0),
+        scale: Vector3.create(12.5, 16, 1)
     })
     MeshCollider.setPlane(towersCollider, ColliderLayer.CL_PHYSICS)
 
