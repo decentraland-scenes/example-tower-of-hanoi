@@ -78,7 +78,7 @@ export function initEnvironment() {
         2.5,
         2.8,
         1.2,
-        [TIME, MOVES, LEVEL],
+        [LEVEL, MOVES],
         {
             showButtons: false,
             sortBy: SCOREBOARD_VALUE_TYPE.MOVES,
