@@ -10,6 +10,7 @@ import * as utils from "@dcl-sdk/utils"
 import { movePlayerTo } from '~system/RestrictedActions'
 import { initStatusBoard } from './statusBoard'
 import { backSign } from './environment'
+import { multiPlayer } from '.'
 
 const maxLevel = 5
 const maxDiscs = maxLevel + 2
@@ -252,7 +253,7 @@ function exitPlayer(move = false) {
   if (move) {
     movePlayerTo({ newRelativePosition: Vector3.create(1, 0, 8) })
   }
-  firstRound =  true
+  firstRound = true
   disableGame()
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
 
@@ -262,7 +263,7 @@ function initPlayerData() {
 
   gameDataEntity = engine.addEntity()
   GameData.create(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-  syncEntity(gameDataEntity, [GameData.componentId], 3002)
+  multiPlayer && syncEntity(gameDataEntity, [GameData.componentId], 3002)
 
 }
 
@@ -293,7 +294,7 @@ function enableGame() {
         //set level buttons according to currentLevel
         if (i === 0) {
           button.enable()
-        }else if ( i <= (maxProgress?.level ?? gameData.currentLevel) ) {
+        } else if (i <= (maxProgress?.level ?? gameData.currentLevel)) {
           button.enable()
         } else {
           button.disable()
@@ -567,7 +568,7 @@ function initDiscs() {
     GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
     Disc.create(entity, { size: i, currentTower: 1 })
 
-    syncEntity(
+    multiPlayer && syncEntity(
       entity,
       [Tween.componentId, Disc.componentId],
       5000 + i
@@ -754,11 +755,11 @@ function setupWinAnimations() {
   VisibilityComponent.create(winAnimFollow, { visible: false })
   VisibilityComponent.create(winAnimText, { visible: false })
 
-  syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
+  multiPlayer && syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
+  multiPlayer && syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
+  multiPlayer && syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
+  multiPlayer && syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
+  multiPlayer && syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
 }
 
 function startWinAnimation() {

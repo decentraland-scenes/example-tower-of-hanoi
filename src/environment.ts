@@ -1,10 +1,9 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity, MeshCollider, ColliderLayer } from '@dcl/sdk/ecs'
 import { ui, sceneParentEntity } from "@dcl-sdk/mini-games/src"
-import { LEVEL, MOVES, ScoreBoard, SCOREBOARD_VALUE_TYPE, TIME } from '@dcl-sdk/mini-games/src/ui'
 
 export let backSign: Entity
-export let scoreboard: ScoreBoard
+export let scoreboard: ui.ScoreBoard
 
 export function initEnvironment() {
     backSign = engine.addEntity()
@@ -78,10 +77,10 @@ export function initEnvironment() {
         2.5,
         2.8,
         1.2,
-        [LEVEL, MOVES],
+        [ui.LEVEL, ui.MOVES],
         {
             showButtons: false,
-            sortBy: SCOREBOARD_VALUE_TYPE.MOVES,
+            sortBy: ui.SCOREBOARD_VALUE_TYPE.MOVES,
             sortDirection: 'asc'
         }
     )
