@@ -1,7 +1,7 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBRealmInfo, PBTween, RealmInfo, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
-import { myProfile, syncEntity } from '@dcl/sdk/network'
+import { myProfile, syncEntity, isStateSyncronized } from '@dcl/sdk/network'
 import players, { getPlayer } from '@dcl/sdk/players'
 import { queue, sceneParentEntity, ui, progress } from "@dcl-sdk/mini-games/src"
 
@@ -77,16 +77,31 @@ export function initGame() {
   // Enable start game button after we are connected to comms.
   // Maybe I can create a custom component to detect when the initial state has been syncronized and await for that component.
   // But for the moment I'll go this way to debug if this works.
-  engine.addSystem(() => {
+  function sleep(ms: number) {
+    let timer = 0
+    return new Promise<void>((resolve) => {
+      function testSystem(dt: number) {
+        console.log(timer * 1000)
+        timer += dt
+        if (timer * 1000 >= ms) {
+          engine.removeSystem(testSystem)
+          resolve()
+        }
+      }
+      engine.addSystem(testSystem)
+    })
+  }
+
+  engine.addSystem((dt: number) => {
     const realmInfo = RealmInfo.getOrNull(engine.RootEntity)
     if (!realmInfo) return
 
-    if (realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
+    if (isStateSyncronized() && realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
       console.log('Enable Start Game')
       StartGameButton.enable()
     }
 
-    if (!realmInfo.isConnectedSceneRoom && StartGameButton.enabled) {
+    if ((!realmInfo.isConnectedSceneRoom || !isStateSyncronized()) && StartGameButton.enabled) {
       console.log('Disable Start Game')
       StartGameButton.disable()
     }
