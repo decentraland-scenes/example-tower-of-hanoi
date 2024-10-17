@@ -1,8 +1,8 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBTween, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
+import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBRealmInfo, PBTween, RealmInfo, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
-import { syncEntity } from '@dcl/sdk/network'
-import { getPlayer } from '@dcl/sdk/players'
+import { myProfile, syncEntity } from '@dcl/sdk/network'
+import players, { getPlayer } from '@dcl/sdk/players'
 import { queue, sceneParentEntity, ui, progress } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
@@ -57,12 +57,12 @@ export function initGame() {
   initPlanks()
 
   // start game button
-  new ui.MenuButton(
+  const StartGameButton = new ui.MenuButton(
     {
       parent: sceneParentEntity,
       position: Vector3.create(-3.74, 1.03, 0),
       rotation: Quaternion.fromEulerDegrees(-45, 90, 0),
-      scale: Vector3.create(1.2, 1.2, 1.2)
+      scale: Vector3.create(1.2, 1.2, 1.2),
     },
     ui.uiAssets.shapes.RECT_GREEN,
     ui.uiAssets.icons.playText,
@@ -71,8 +71,28 @@ export function initGame() {
       queue.addPlayer()
     }
   )
+  // Disable the start game button till the user is connected to comms.
+  StartGameButton.disable()
+
+  // Disable the Start Game button if the user leaves the scene.
+  players.onLeaveScene((userId) => {
+    if (myProfile.userId === userId) {
+      StartGameButton.disable()
+    }
+  })
+
+  // Enable start game button after we are connected to comms.
+  // Maybe I can create a custom component to detect when the initial state has been syncronized and await for that component.
+  // But for the moment I'll go this way to debug if this works.
+  engine.addSystem(() => {
+    const realmInfo = RealmInfo.getOrNull(engine.RootEntity)
+    if (realmInfo && realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
+      StartGameButton.enable()
+    }
+  })
 
   gameAreaCollider = engine.addEntity()
+
   Transform.create(gameAreaCollider, {
     parent: sceneParentEntity,
     position: Vector3.create(1.5, 0, 0),
