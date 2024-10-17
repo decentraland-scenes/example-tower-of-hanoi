@@ -74,20 +74,21 @@ export function initGame() {
   // Disable the start game button till the user is connected to comms.
   StartGameButton.disable()
 
-  // Disable the Start Game button if the user leaves the scene.
-  players.onLeaveScene((userId) => {
-    if (myProfile.userId === userId) {
-      StartGameButton.disable()
-    }
-  })
-
   // Enable start game button after we are connected to comms.
   // Maybe I can create a custom component to detect when the initial state has been syncronized and await for that component.
   // But for the moment I'll go this way to debug if this works.
   engine.addSystem(() => {
     const realmInfo = RealmInfo.getOrNull(engine.RootEntity)
-    if (realmInfo && realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
+    if (!realmInfo) return
+
+    if (realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
+      console.log('Enable Start Game')
       StartGameButton.enable()
+    }
+
+    if (!realmInfo.isConnectedSceneRoom && StartGameButton.enabled) {
+      console.log('Disable Start Game')
+      StartGameButton.disable()
     }
   })
 
