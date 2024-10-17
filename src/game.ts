@@ -102,7 +102,7 @@ export function initGame() {
     }
 
     if ((!realmInfo.isConnectedSceneRoom || !isStateSyncronized()) && StartGameButton.enabled) {
-      console.log('Disable Start Game')
+      console.log(`Disable Start Game. { isConnectedSceneRoom: ${realmInfo.isConnectedSceneRoom}, isStateSyncronized: ${isStateSyncronized()} }`)
       StartGameButton.disable()
     }
   })
