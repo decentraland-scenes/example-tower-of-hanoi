@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@dcl-sdk/mini-games": "^1.0.0-20241011125057.commit-e9eeb84",
-    "@dcl/sdk": "https://sdk-team-cdn.decentraland.org/@dcl/js-sdk-toolchain/branch/feat/wait-for-sync-state/dcl-sdk-7.6.3-11390685136.commit-485e42c.tgz"
+    "@dcl/sdk": "https://sdk-team-cdn.decentraland.org/@dcl/js-sdk-toolchain/branch/feat/wait-for-sync-state/dcl-sdk-7.6.3-11406843434.commit-e62dc2c.tgz"
   }
 }
