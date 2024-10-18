@@ -1,16 +1,15 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBRealmInfo, PBTween, RealmInfo, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
-import { myProfile, syncEntity } from '@dcl/sdk/network'
+import { myProfile, syncEntity, isStateSyncronized } from '@dcl/sdk/network'
 import players, { getPlayer } from '@dcl/sdk/players'
-import { queue, sceneParentEntity, ui, progress } from "@dcl-sdk/mini-games/src"
+import { queue, sceneParentEntity, ui, progress, StartGameButtonCheck } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
 import { initStatusBoard } from './statusBoard'
 import { backSign } from './environment'
-import { multiPlayer } from '.'
 
 const maxLevel = 5
 const maxDiscs = maxLevel + 2
@@ -71,26 +70,7 @@ export function initGame() {
       queue.addPlayer()
     }
   )
-  // Disable the start game button till the user is connected to comms.
-  StartGameButton.disable()
-
-  // Enable start game button after we are connected to comms.
-  // Maybe I can create a custom component to detect when the initial state has been syncronized and await for that component.
-  // But for the moment I'll go this way to debug if this works.
-  engine.addSystem(() => {
-    const realmInfo = RealmInfo.getOrNull(engine.RootEntity)
-    if (!realmInfo) return
-
-    if (realmInfo.isConnectedSceneRoom && !StartGameButton.enabled) {
-      console.log('Enable Start Game')
-      StartGameButton.enable()
-    }
-
-    if (!realmInfo.isConnectedSceneRoom && StartGameButton.enabled) {
-      console.log('Disable Start Game')
-      StartGameButton.disable()
-    }
-  })
+  StartGameButtonCheck(StartGameButton)
 
   gameAreaCollider = engine.addEntity()
 
@@ -284,8 +264,7 @@ function initPlayerData() {
 
   gameDataEntity = engine.addEntity()
   GameData.create(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-  multiPlayer && syncEntity(gameDataEntity, [GameData.componentId], 3002)
-
+  syncEntity(gameDataEntity, [GameData.componentId], 3002)
 }
 
 function disableGame() {
@@ -589,7 +568,7 @@ function initDiscs() {
     GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
     Disc.create(entity, { size: i, currentTower: 1 })
 
-    multiPlayer && syncEntity(
+    syncEntity(
       entity,
       [Tween.componentId, Disc.componentId],
       5000 + i
@@ -776,11 +755,11 @@ function setupWinAnimations() {
   VisibilityComponent.create(winAnimFollow, { visible: false })
   VisibilityComponent.create(winAnimText, { visible: false })
 
-  multiPlayer && syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
-  multiPlayer && syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
-  multiPlayer && syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
-  multiPlayer && syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
-  multiPlayer && syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
+  syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
 }
 
 function startWinAnimation() {
