@@ -1,9 +1,9 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBRealmInfo, PBTween, RealmInfo, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
-import { myProfile, syncEntity, isStateSyncronized } from '@dcl/sdk/network'
-import players, { getPlayer } from '@dcl/sdk/players'
-import { queue, sceneParentEntity, ui, progress, StartGameButtonCheck } from "@dcl-sdk/mini-games/src"
+import { syncEntity } from '@dcl/sdk/network'
+import { getPlayer } from '@dcl/sdk/players'
+import { queue, sceneParentEntity, ui, progress } from "@dcl-sdk/mini-games/src"
 
 import * as utils from "@dcl-sdk/utils"
 
@@ -56,7 +56,7 @@ export function initGame() {
   initPlanks()
 
   // start game button
-  const StartGameButton = new ui.MenuButton(
+  new ui.MenuButton(
     {
       parent: sceneParentEntity,
       position: Vector3.create(-3.74, 1.03, 0),
@@ -70,7 +70,6 @@ export function initGame() {
       queue.addPlayer()
     }
   )
-  StartGameButtonCheck(StartGameButton)
 
   gameAreaCollider = engine.addEntity()
 
