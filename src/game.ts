@@ -778,18 +778,21 @@ function startWinAnimation() {
     if (GameData.get(gameDataEntity).currentLevel <= maxLevel) {
       // console.log("playersQueue: ", queue.getQueue())
       //add challenge check
-      if (queue.getQueue().length > 1) {
-        queue.setNextPlayer()
-      } else {
-        const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
-        console.log(nextLevel)
+      
+      // if (queue.getQueue().length > 1) {
+        // queue.setNextPlayer()
+      // } else {
+      
+      const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
+        // console.log(nextLevel)
         if (nextLevel === maxLevel + 1) {
           queue.setNextPlayer()
         } else {
           gameButtons[nextLevel - 1].enable()
           startLevel(nextLevel)
         }
-      }
+      
+        // }
     }
   }, 8000)
 }
