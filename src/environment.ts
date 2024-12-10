@@ -1,11 +1,18 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
-import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, MeshRenderer, Transform, engine, Entity, MeshCollider, ColliderLayer } from '@dcl/sdk/ecs'
-import { ui, sceneParentEntity } from "@dcl-sdk/mini-games/src"
+import { AudioSource, AvatarModifierArea, AvatarModifierType, GltfContainer, Transform, engine, Entity, MeshCollider, ColliderLayer } from '@dcl/sdk/ecs'
+
+import * as ui from "./ui"
 
 export let backSign: Entity
-export let scoreboard: ui.ScoreBoard
+export let sceneParentEntity: Entity
 
 export function initEnvironment() {
+    sceneParentEntity = engine.addEntity()
+
+    Transform.create(sceneParentEntity, {
+        position: Vector3.create(8,0,8)
+    })
+
     backSign = engine.addEntity()
 
     GltfContainer.create(backSign, {
@@ -43,47 +50,6 @@ export function initEnvironment() {
         parent: sideSignA,
         position: Vector3.create(0, 0, 0)
     })
-
-    let sideSignB = engine.addEntity()
-
-    GltfContainer.create(sideSignB, {
-        src: "assets/scene/sideSign.glb"
-
-    })
-
-    Transform.create(sideSignB, {
-        parent: sceneParentEntity,
-        position: Vector3.create(-6, 0, -7.4),
-        scale: Vector3.create(0.8, 0.8, 0.8),
-        rotation: Quaternion.fromEulerDegrees(0, 0, 0)
-    })
-
-    let sideSignHeaderB = engine.addEntity()
-
-    GltfContainer.create(sideSignHeaderB, {
-        src: "assets/scene/scoreBoardHeader.glb"
-    })
-
-    Transform.create(sideSignHeaderB, {
-        parent: sideSignB,
-        position: Vector3.create(0, -0.2, 0)
-    })
-
-    scoreboard = new ui.ScoreBoard({
-        parent: sideSignB,
-        position: Vector3.create(1.3, 4, 0.15),
-        rotation: Quaternion.fromEulerDegrees(0, 180, 0)
-    },
-        2.5,
-        2.8,
-        1.2,
-        [ui.LEVEL, ui.MOVES],
-        {
-            showButtons: false,
-            sortBy: ui.SCOREBOARD_VALUE_TYPE.MOVES,
-            sortDirection: 'asc'
-        }
-    )
 
     let fence = engine.addEntity()
 
@@ -165,6 +131,4 @@ export function initEnvironment() {
         scale: Vector3.create(12.5, 16, 1)
     })
     MeshCollider.setPlane(towersCollider, ColliderLayer.CL_PHYSICS)
-
-    // MeshRenderer.setPlane(towersCollider)
 }

@@ -2,7 +2,7 @@
   "ecs7": true,
   "runtimeVersion": "7",
   "display": {
-    "title": "Tower of Hanoi",
+    "title": "Tower of Hanoi example",
     "description": "Classic Tower of Hanoi game",
     "navmapThumbnail": "images/scene-thumbnail.png",
     "favicon": "favicon_asset"
@@ -18,9 +18,9 @@
   ],
   "scene": {
     "parcels": [
-      "61,-22"
+      "0,0"
     ],
-    "base": "61,-22"
+    "base": "0,0"
   },
   "spawnPoints": [
     {

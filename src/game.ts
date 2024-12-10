@@ -1,15 +1,14 @@
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
 import { Animator, AudioSource, Billboard, ColliderLayer, EasingFunction, Entity, GltfContainer, InputAction, MeshCollider, MeshRenderer, PBRealmInfo, PBTween, RealmInfo, Schemas, Transform, TransformType, Tween, TweenSequence, VisibilityComponent, engine, pointerEventsSystem } from '@dcl/sdk/ecs'
 
-import { syncEntity } from '@dcl/sdk/network'
 import { getPlayer } from '@dcl/sdk/players'
-import { queue, sceneParentEntity, ui, progress } from "@dcl-sdk/mini-games/src"
+import * as ui from "./ui"
 
 import * as utils from "@dcl-sdk/utils"
 
 import { movePlayerTo } from '~system/RestrictedActions'
 import { initStatusBoard } from './statusBoard'
-import { backSign } from './environment'
+import { backSign, sceneParentEntity } from './environment'
 
 const maxLevel = 5
 const maxDiscs = maxLevel + 2
@@ -22,8 +21,6 @@ const gameButtons: ui.MenuButton[] = []
 const planks: Entity[] = []
 let gameAreaCollider: Entity
 let timer: ui.Timer3D
-let maxProgress: progress.IProgress
-
 
 const sounds = engine.addEntity()
 Transform.create(sounds, { parent: engine.CameraEntity })
@@ -47,8 +44,6 @@ export const Disc = engine.defineComponent('disc', {
 
 export function initGame() {
 
-  getMaxProgress()
-
   initGameButtons()
 
   initCountdownNumbers()
@@ -67,7 +62,7 @@ export function initGame() {
     ui.uiAssets.icons.playText,
     "PLAY GAME",
     () => {
-      queue.addPlayer()
+      getReadyToStart()
     }
   )
 
@@ -78,14 +73,6 @@ export function initGame() {
     position: Vector3.create(1.5, 0, 0),
     scale: Vector3.create(9.75, 16, 12.5)
   })
-
-  queue.initQueueDisplay({
-    parent: sceneParentEntity,
-    position: Vector3.create(-3.48, 1.47, 0),
-    rotation: Quaternion.fromEulerDegrees(0, -90, 0),
-    scale: Vector3.create(1, 1, 1)
-  })
-
 
   disableGame()
 
@@ -100,23 +87,6 @@ export function initGame() {
 
   console.log("init setupAnimations")
   setupWinAnimations()
-
-  queue.listeners.onActivePlayerChange = (player) => {
-    const localPlayer = getPlayer()
-    if (player?.address === localPlayer?.userId) {
-      getReadyToStart()
-    } else {
-      disableGame()
-      firstRound = true
-    }
-  }
-
-}
-
-async function getMaxProgress() {
-  const req = await progress.getProgress('level', progress.SortDirection.DESC, 1)
-  if (req?.length) maxProgress = req[0]
-  // console.log("getting player progress", req)
 }
 
 function initPlanks() {
@@ -148,8 +118,8 @@ function initPlanks() {
 
 function initCountdownNumbers() {
   timer = new ui.Timer3D({
-    parent: sceneParentEntity,
-    position: Vector3.create(3, 3, 0),
+      parent: sceneParentEntity,
+      position: Vector3.create(3, 3, 0),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
   }, 1, 1, false, 10)
 
@@ -256,14 +226,11 @@ function exitPlayer(move = false) {
   firstRound = true
   disableGame()
   GameData.createOrReplace(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-
-  queue.setNextPlayer()
 }
 function initPlayerData() {
 
   gameDataEntity = engine.addEntity()
   GameData.create(gameDataEntity, { playerAddress: '', playerName: '', currentLevel: -1 })
-  syncEntity(gameDataEntity, [GameData.componentId], 3002)
 }
 
 function disableGame() {
@@ -293,7 +260,7 @@ function enableGame() {
         //set level buttons according to currentLevel
         if (i === 0) {
           button.enable()
-        } else if (i <= (maxProgress?.level ?? gameData.currentLevel)) {
+        } else if (i <= gameData.currentLevel) {
           button.enable()
         } else {
           button.disable()
@@ -349,20 +316,17 @@ async function countdown(cb: () => void, number: number) {
 }
 
 function getReadyToStart() {
-  getMaxProgress()
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: "sounds/pre_countdown.mp3",
     playing: enabledSounds
   })
 
-  utils.timers.setTimeout(() => {
+  // utils.timers.setTimeout(() => {
     movePlayerTo({ newRelativePosition: Vector3.create(6.5, 2, 8), cameraTarget: Vector3.create(13, 2, 8) })
     startLevel(1)
 
-  }, 4000)
-  // countdown(() => {
-  // }, 4)
+  // }, 4000)
 }
 
 function undo() {
@@ -377,7 +341,6 @@ function undo() {
 }
 
 function onTowerClick(towerNumber: number) {
-  if (!queue.isActive()) return
 
   if (getSelectedDisc()) {
     validateMove(towerNumber)
@@ -438,13 +401,6 @@ function onFinishLevel() {
     playing: enabledSounds,
     volume: 2
   })
-
-  progress.upsertProgress({
-    level: gameData.currentLevel,
-    time: gameData.levelFinishedAt - gameData.levelStartedAt,
-    moves: gameData.moves
-  })
-
 
   startWinAnimation()
 }
@@ -567,16 +523,10 @@ function initDiscs() {
     GltfContainer.create(entity, { src: `assets/scene/disc${i}.glb`, visibleMeshesCollisionMask: ColliderLayer.CL_PHYSICS })
     Disc.create(entity, { size: i, currentTower: 1 })
 
-    syncEntity(
-      entity,
-      [Tween.componentId, Disc.componentId],
-      5000 + i
-    )
   }
 }
 
 function startLevel(levelN: number) {
-  if (!queue.isActive()) return
 
   AudioSource.createOrReplace(sounds, {
     audioClipUrl: "sounds/countdown.mp3",
@@ -650,7 +600,7 @@ function setupWinAnimations() {
   })
 
   Transform.create(winAnimA, {
-    position: Vector3.create(14, 0.2, 2),
+      position: Vector3.create(14, 0.2, 2),
     scale: Vector3.create(1, 1, 1),
     rotation: Quaternion.fromEulerDegrees(0, 45, 0)
   })
@@ -671,7 +621,7 @@ function setupWinAnimations() {
   })
 
   Transform.create(winAnimB, {
-    position: Vector3.create(14, 0.2, 8),
+      position: Vector3.create(14, 0.2, 8),
     scale: Vector3.create(1, 1, 1),
     rotation: Quaternion.fromEulerDegrees(0, 0, 0)
   })
@@ -691,7 +641,7 @@ function setupWinAnimations() {
   })
 
   Transform.create(winAnimC, {
-    position: Vector3.create(14, 0.2, 14),
+      position: Vector3.create(14, 0.2, 14),
     scale: Vector3.create(1, 1, 1),
     rotation: Quaternion.fromEulerDegrees(0, -45, 0)
   })
@@ -711,7 +661,7 @@ function setupWinAnimations() {
   })
 
   Transform.create(winAnimFollow, {
-    position: Vector3.create(10, 2, 8),
+      position: Vector3.create(10, 2, 8),
     scale: Vector3.create(0.3, 0.3, 0.3),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
   })
@@ -742,7 +692,7 @@ function setupWinAnimations() {
   })
 
   Transform.create(winAnimText, {
-    position: Vector3.create(10, 2, 8),
+      position: Vector3.create(10, 2, 8),
     scale: Vector3.create(0.8, 0.8, 0.8),
     rotation: Quaternion.fromEulerDegrees(0, -90, 0)
   })
@@ -753,12 +703,6 @@ function setupWinAnimations() {
   VisibilityComponent.create(winAnimC, { visible: false })
   VisibilityComponent.create(winAnimFollow, { visible: false })
   VisibilityComponent.create(winAnimText, { visible: false })
-
-  syncEntity(winAnimA, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimB, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimC, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimFollow, [VisibilityComponent.componentId, Animator.componentId])
-  syncEntity(winAnimText, [VisibilityComponent.componentId, Animator.componentId])
 }
 
 function startWinAnimation() {
@@ -776,23 +720,14 @@ function startWinAnimation() {
     }
     console.log("GameData current level: ", GameData.get(gameDataEntity).currentLevel)
     if (GameData.get(gameDataEntity).currentLevel <= maxLevel) {
-      // console.log("playersQueue: ", queue.getQueue())
-      //add challenge check
-      
-      // if (queue.getQueue().length > 1) {
-        // queue.setNextPlayer()
-      // } else {
-      
+
       const nextLevel = GameData.get(gameDataEntity).currentLevel + 1
-        // console.log(nextLevel)
-        if (nextLevel === maxLevel + 1) {
-          queue.setNextPlayer()
-        } else {
-          gameButtons[nextLevel - 1].enable()
-          startLevel(nextLevel)
-        }
-      
-        // }
+      if (nextLevel === maxLevel + 1) {
+        exitPlayer(true)
+      } else {
+        gameButtons[nextLevel - 1].enable()
+        startLevel(nextLevel)
+      }
     }
   }, 8000)
 }
