@@ -10,7 +10,7 @@ This repository is a reduced version of Tower of Hanoi mini game located at [61,
 
 ### Compatibility:
 
-Some features of this scene are only avilable using the new Decentraland Launcher. This scene won't be fully compatible with web browser preview.
+Some features of this scene are only available by using the new [Decentraland Client](https://decentraland.org/download/). This scene won't be fully compatible with web browser preview.
 
 ### Running:
 ```
